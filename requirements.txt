@@ -1,0 +1,20 @@
+# Core deep learning
+torch>=1.12.0
+torchvision>=0.13.0
+
+# YOLOv7 dependencies
+numpy
+opencv-python
+matplotlib
+pillow
+pyyaml
+tqdm
+scipy
+
+# Jupyter/Colab support
+notebook
+ipython
+
+# Optional: logging and experiment tracking
+tensorboard
+seaborn

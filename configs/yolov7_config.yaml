@@ -1,0 +1,16 @@
+# yolov7_config.yaml
+
+# Dataset paths
+train: /content/drive/MyDrive/concrete-crack-dataset/images/train
+val: /content/drive/MyDrive/concrete-crack-dataset/images/val
+nc: 2   # number of classes (crack, no crack)
+names: ['crack', 'no_crack']
+
+# Training parameters
+epochs: 50
+batch_size: 16
+img_size: 640
+
+# Model
+weights: yolov7.pt   # pre-trained weights
+hyp: data/hyp.scratch.yaml  # hyperparameters file

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets (keep only small samples)
+datasets/images/*
+datasets/labels/*
+!datasets/images/sample*
+!datasets/labels/sample*
+
+# Outputs
+outputs/logs/
+outputs/results/
+outputs/weights/
+
+# Environment
+.env
+*.egg-info/
+*.egg
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Colab/Google Drive sync
+*.ipynb.json
