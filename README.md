@@ -199,7 +199,7 @@ Severity classification: Accuracy, Precision, Recall, F1-score, Confusion Matrix
 
 10. Thành viên thực hiện
 
-Sinh viên thực hiện: Ngô Kim Thành - 23524117; Trần Công Thành - 23521463
+Sinh viên thực hiện: Ngô Kim Thành - 23524117; Trần Công Thành - 23521463.
 Giảng viên hướng dẫn: TS. Phan Xuân Thiện
 Trường / Khoa: Khoa Mạng máy tính và truyền thông, Trường Đại học Công nghệ Thông tin, ĐHQG-HCM
 
