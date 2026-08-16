@@ -209,4 +209,4 @@ Trường / Khoa: Khoa Mạng máy tính và truyền thông, Trường Đại h
 Ultralytics YOLOv11 Official Documentation
 Các nghiên cứu về crack detection, quantification và severity classification (2024–2026)
 ACI 224R-01 – Control of Cracking in Concrete Structures
-Các tiêu chuẩn TCVN liên quan đến giới hạn bề rộng vết nứt bê tông
+Các tiêu chuẩn TCVN liên quan đến giới hạn bề rộng vết nứt bê tông.
