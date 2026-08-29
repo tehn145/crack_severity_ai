@@ -1,0 +1,6 @@
+# Bỏ qua toàn bộ dữ liệu thô và dữ liệu đã xử lý
+data/
+outputs/
+weights/
+*.zip
+*.csv
