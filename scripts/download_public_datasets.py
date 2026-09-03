@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 download_public_datasets.py
-Script chuẩn tải dataset công khai - hỗ trợ nhiều bề mặt (tường, đường, cầu)
+Script chuẩn tải dataset công khai - hỗ trợ nhiều bề mặt
+(Tường, Bê tông, Mặt đường, Mặt cầu)
 Có thanh tiến độ phần trăm
+→ Chỉ tải những bộ còn thiếu (không tải lại từ đầu)
 """
 
-import os
 import subprocess
 import zipfile
 from pathlib import Path
@@ -17,34 +18,43 @@ BASE_DIR = Path("data/raw/public")
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 
 DATASETS = [
-    # ===== Bề mặt đa dạng (ưu tiên theo yêu cầu thầy) =====
+    # ===== 1. ĐA BỀ MẶT (ưu tiên cao nhất) =====
     {
         "name": "SDNET2018",
         "kaggle": "atharv0919/sdnet2018-a-concrete-crack-image-dataset",
-        "description": "SDNET2018 - Bridge Deck + Wall + Pavement (~56k ảnh)"
+        "description": "SDNET2018 - Bridge Deck + Wall + Pavement (~56k ảnh) ★★★"
     },
     {
         "name": "Roads_and_Bridges",
         "kaggle": "danishghaffar786/roads-and-bridges-cracks-yolov8-format",
-        "description": "Roads and Bridges Cracks (YOLOv8 format) - Đường + Cầu"
+        "description": "Roads and Bridges Cracks (YOLOv8) - Đường + Cầu"
+    },
+    {
+        "name": "Concrete_and_Pavement",
+        "kaggle": "oluwaseunad/concrete-and-pavement-crack-images",
+        "description": "Concrete & Pavement Crack Dataset (30k ảnh)"
+    },
+
+    # ===== 2. MẶT ĐƯỜNG =====
+    {
+        "name": "Crack500",
+        "kaggle": "pauldavid22/crack50020220509t090436z001",
+        "description": "Crack500 - Đường asphalt (Segmentation)"
     },
     {
         "name": "CFD",
         "kaggle": "mahendrachouhanml/crackforest",
-        "description": "Crack Forest Dataset (CFD) - Đường phố"
+        "description": "Crack Forest Dataset (CFD) - Đường phố / mặt đường asphalt"
     },
 
-    # ===== Các bộ trước đó =====
+    # ===== 3. TƯỜNG / BÊ TÔNG =====
     {
         "name": "METU",
         "kaggle": "arnavr10880/concrete-crack-images-for-classification",
-        "description": "METU Concrete Crack (tường bê tông, 40k ảnh)"
+        "description": "METU Concrete Crack - Tường bê tông (40k ảnh)"
     },
-    {
-        "name": "Crack500",
-        "kaggle": "pauldavid22/crack50020220509t090436z001",
-        "description": "Crack500 - Đường asphalt"
-    },
+
+    # ===== 4. BỘ BỔ SUNG (tải trực tiếp) =====
     {
         "name": "Ultralytics_CrackSeg",
         "kaggle": None,
@@ -67,6 +77,25 @@ class DownloadProgressBar(tqdm):
         self.update(b * bsize - self.n)
 
 
+def is_already_downloaded(target_dir: Path) -> bool:
+    """
+    Kiểm tra xem dataset đã được tải chưa.
+    Coi là đã tải nếu thư mục tồn tại và có ít nhất vài file ảnh bên trong.
+    """
+    if not target_dir.exists():
+        return False
+
+    # Đếm số file ảnh
+    image_exts = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+    image_count = 0
+    for ext in image_exts:
+        image_count += len(list(target_dir.rglob(f"*{ext}")))
+        image_count += len(list(target_dir.rglob(f"*{ext.upper()}")))
+
+    # Nếu có từ 5 ảnh trở lên thì coi như đã tải thành công
+    return image_count >= 5
+
+
 def download_via_kaggle(slug: str, target_dir: Path) -> bool:
     print(f"   → Đang tải bằng Kaggle CLI: {slug}")
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -79,7 +108,6 @@ def download_via_kaggle(slug: str, target_dir: Path) -> bool:
     ]
 
     try:
-        # Không capture để hiện thanh tiến độ của Kaggle
         subprocess.run(cmd, check=True)
         return True
     except subprocess.CalledProcessError:
@@ -95,7 +123,7 @@ def download_direct(url: str, target_dir: Path, filename: str = "download.zip") 
     zip_path = target_dir / filename
 
     if zip_path.exists():
-        print(f"   [SKIP] File đã tồn tại: {zip_path.name}")
+        print(f"   [SKIP] File zip đã tồn tại: {zip_path.name}")
     else:
         print(f"   → Đang tải trực tiếp...")
         try:
@@ -117,7 +145,13 @@ def download_direct(url: str, target_dir: Path, filename: str = "download.zip") 
         return False
 
 
-def download_dataset(ds: dict) -> bool:
+def download_dataset(ds: dict) -> str:
+    """
+    Trả về:
+        "skipped"  → đã có sẵn
+        "success"  → tải thành công
+        "failed"   → tải thất bại
+    """
     name = ds["name"]
     target_dir = BASE_DIR / name
 
@@ -126,38 +160,63 @@ def download_dataset(ds: dict) -> bool:
     print(f"   {ds.get('description', '')}")
     print("="*60)
 
+    # === Kiểm tra đã tải chưa ===
+    if is_already_downloaded(target_dir):
+        print("   ✅ Đã có sẵn → Bỏ qua (không tải lại)")
+        return "skipped"
+
+    # === Tiến hành tải ===
     if ds.get("kaggle"):
         success = download_via_kaggle(ds["kaggle"], target_dir)
         if success:
-            return True
+            return "success"
         print("   [WARN] Kaggle thất bại → thử tải trực tiếp...")
 
     if ds.get("direct_url"):
-        return download_direct(ds["direct_url"], target_dir)
+        success = download_direct(ds["direct_url"], target_dir)
+        return "success" if success else "failed"
 
     print("   [ERROR] Không có cách tải nào thành công")
-    return False
+    return "failed"
 
 
 def main():
     print("="*60)
     print("DOWNLOAD PUBLIC DATASETS - Crack Severity AI")
-    print("Hỗ trợ nhiều bề mặt: Tường + Đường + Cầu")
+    print("Hỗ trợ nhiều bề mặt: Tường • Bê tông • Mặt đường • Mặt cầu")
+    print("Chỉ tải những bộ còn thiếu")
     print("="*60)
 
-    results = {}
-    for ds in DATASETS:
-        results[ds["name"]] = download_dataset(ds)
+    results = {"success": [], "skipped": [], "failed": []}
 
+    for ds in DATASETS:
+        status = download_dataset(ds)
+        results[status].append(ds["name"])
+
+    # ===== Tổng kết =====
     print("\n" + "="*60)
     print("KẾT QUẢ TẢI")
     print("="*60)
-    for name, success in results.items():
-        status = "✅ Thành công" if success else "❌ Thất bại"
-        print(f"{name:25s} : {status}")
+
+    if results["skipped"]:
+        print("\n✅ Đã có sẵn (bỏ qua):")
+        for name in results["skipped"]:
+            print(f"   • {name}")
+
+    if results["success"]:
+        print("\n⬇️  Tải mới thành công:")
+        for name in results["success"]:
+            print(f"   • {name}")
+
+    if results["failed"]:
+        print("\n❌ Tải thất bại:")
+        for name in results["failed"]:
+            print(f"   • {name}")
 
     print(f"\nThư mục dữ liệu: {BASE_DIR.resolve()}")
-    print("\nGhi chú: SDNET2018 + Roads_and_Bridges + CFD giúp đáp ứng yêu cầu đa bề mặt của thầy.")
+    print(f"Tổng cộng: {len(results['skipped'])} bỏ qua | "
+          f"{len(results['success'])} tải mới | "
+          f"{len(results['failed'])} thất bại")
 
 
 if __name__ == "__main__":

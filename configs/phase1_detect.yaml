@@ -1,0 +1,15 @@
+# configs/phase1_detect.yaml
+# Cấu hình dữ liệu cho Phase 1 - Crack Detection
+# Crack Severity AI - Khóa luận tốt nghiệp
+
+path: data/processed/phase1   # đường dẫn gốc đến thư mục dữ liệu
+train: images/train
+val: images/val
+test: images/test
+
+# Số lớp
+nc: 1
+
+# Tên lớp
+names:
+  0: crack
