@@ -1,45 +1,40 @@
-<<<<<<< HEAD
-# Dữ liệu (không up)
-data/raw/
-data/processed/
-data/hard_cases/
-data/splits/
+# --- Data: giữ folder, không up file dữ liệu ---
+data/**/*
+!data/**/
+!data/**/.gitkeep
 
-# Weights / model
-weights/
+# Phòng hờ đuôi ảnh / label / weight
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.txt
+!requirements.txt
+!**/CMakeLists.txt
+
 *.pt
 *.pth
 *.onnx
-*.engine
+*.zip
+*.rar
+*.7z
 
-# Output chạy thực nghiệm
-outputs/
+# Training / cache
+weights/
 runs/
-*.log
-
-# Python
+outputs/logs/
+outputs/predictions/
+outputs/reports/*.json
 __pycache__/
 *.py[cod]
-*.egg-info/
 .venv/
 venv/
 .env
-
-# IDE / OS
-.idea/
+.ipynb_checkpoints/
 .vscode/
+.idea/
 .DS_Store
 Thumbs.db
-
-# Kaggle / tạm
-*.zip
-*.tar
-*.tar.gz
-=======
-# Bỏ qua toàn bộ dữ liệu thô và dữ liệu đã xử lý
-data/
-outputs/
-weights/
-*.zip
-*.csv
->>>>>>> 01c117f26abbfbea343372f378a33625db43d9a3
