@@ -1,39 +1,14 @@
-# --- Data: giữ folder, không up file dữ liệu ---
-data/**/*
-!data/**/
-!data/**/.gitkeep
-
-# Phòng hờ đuôi ảnh / label / weight
-*.jpg
-*.jpeg
-*.png
-*.bmp
-*.tif
-*.tiff
-*.webp
-*.txt
-!requirements.txt
-!**/CMakeLists.txt
-
+data/
+outputs/
+weights/
 *.pt
 *.pth
 *.onnx
-*.zip
-*.rar
-*.7z
-
-# Training / cache
-weights/
 runs/
-outputs/logs/
-outputs/predictions/
-outputs/reports/*.json
 __pycache__/
-*.py[cod]
 .venv/
 venv/
 .env
-.ipynb_checkpoints/
 .vscode/
 .idea/
 .DS_Store
