@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dữ liệu (không up)
 data/raw/
 data/processed/
@@ -34,3 +35,11 @@ Thumbs.db
 *.zip
 *.tar
 *.tar.gz
+=======
+# Bỏ qua toàn bộ dữ liệu thô và dữ liệu đã xử lý
+data/
+outputs/
+weights/
+*.zip
+*.csv
+>>>>>>> 01c117f26abbfbea343372f378a33625db43d9a3
