@@ -1,0 +1,36 @@
+# Dữ liệu (không up)
+data/raw/
+data/processed/
+data/hard_cases/
+data/splits/
+
+# Weights / model
+weights/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Output chạy thực nghiệm
+outputs/
+runs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Kaggle / tạm
+*.zip
+*.tar
+*.tar.gz

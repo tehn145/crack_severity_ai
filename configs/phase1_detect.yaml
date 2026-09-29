@@ -1,0 +1,11 @@
+# configs/phase1_detect.yaml
+# Phase 1 - Crack Detection (Primary / Clean set)
+
+path: data/processed/phase1
+train: images/train
+val: images/val
+test: images/test
+
+nc: 1
+names:
+  0: crack
