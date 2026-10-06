@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
 build_clean_phase1.py
-Phase 1 — YOLO-Seg (polygon chi tiết)
+Phase 1 — YOLO-Seg (polygon thống nhất 1 type)
   CFD | Crack500 | DeepCrack | Roads_and_Bridges | Ultralytics_CrackSeg
 
-Luồng:
-  1) Scan/convert tất cả bộ
-  2) OVERVIEW + file báo cáo
-  3) Gõ yes một lần → xuất primary/{train,val,test}
+Mọi label đầu ra cùng 1 format:
+  cls x1 y1 x2 y2 x3 y3 ...  (YOLO-seg polygon)
 
-Label:
-  - CFD / Crack500 / DeepCrack: mask → polygon seg
-  - Ultralytics: giữ polygon gốc
-  - Roads_and_Bridges: giữ txt (seg gốc, hoặc bbox → polygon 4 điểm)
+Nguồn:
+  - Có mask (CFD, Crack500, DeepCrack): LUÔN convert mask → polygon dày
+  - Chỉ có txt (Roads, Ultralytics): chuẩn hóa về cùng polygon
+      (seg giữ; bbox → polygon 4 điểm)
 
+Luồng: Scan → OVERVIEW → yes → primary/{train,val,test}
 Train: YOLO("yolov8s-seg.pt")
 """
 
@@ -28,7 +27,6 @@ from datetime import datetime
 OUT_BASE = Path("data/processed/phase1/primary")
 TRAIN_RATIO = 0.80
 VAL_RATIO = 0.10
-# test = 0.10
 
 IMG_EXTS_ALL = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 
@@ -51,6 +49,12 @@ STUDENTS = [
 ]
 SCHOOL = "Trường Đại học Công nghệ Thông tin — ĐHQG-HCM"
 
+# Polygon dày (bám pixel hơn)
+APPROX_EPS = 0.0001
+MAX_POINTS = 400
+MIN_AREA = 8
+MIN_POINTS = 3
+
 
 def log(msg: str = "", also_print: bool = True):
     if also_print:
@@ -62,7 +66,7 @@ def log(msg: str = "", also_print: bool = True):
 def write_report_header():
     lines = [
         "=" * 72,
-        "BÁO CÁO XỬ LÝ DỮ LIỆU ĐẦU VÀO — PHASE 1 (PRIMARY / YOLO-SEG)",
+        "BÁO CÁO XỬ LÝ DỮ LIỆU — PHASE 1 PRIMARY (YOLO-SEG THỐNG NHẤT)",
         "KHÓA LUẬN TỐT NGHIỆP",
         "=" * 72,
         "",
@@ -74,22 +78,19 @@ def write_report_header():
         lines.append(f"  - {s}")
     lines += [
         "",
-        "Tên đề tài (VI):",
-        f"  {THESIS_TITLE_VI}",
-        "Tên đề tài (EN):",
-        f"  {THESIS_TITLE_EN}",
+        f"Tên đề tài (VI): {THESIS_TITLE_VI}",
+        f"Tên đề tài (EN): {THESIS_TITLE_EN}",
         "",
-        f"Thời điểm chạy script : {datetime.now():%Y-%m-%d %H:%M:%S}",
-        f"File báo cáo          : {REPORT_FILE.resolve()}",
+        f"Thời điểm chạy : {datetime.now():%Y-%m-%d %H:%M:%S}",
+        f"File báo cáo   : {REPORT_FILE.resolve()}",
         "",
-        "Mục tiêu bước này:",
-        "  - Quét và khớp ảnh / mask / label theo từng bộ",
-        "  - Chuyển mask → nhãn YOLO-Seg polygon (class 0) chi tiết",
-        "  - Giữ polygon gốc Ultralytics; Roads: seg hoặc bbox→polygon",
-        "  - Chia train/val/test (80/10/10) theo hash ổn định",
+        "Quy ước label (1 type duy nhất):",
+        "  YOLO-Seg polygon: cls x1 y1 x2 y2 x3 y3 ...",
+        "  - Có mask → convert mask (polygon dày)",
+        "  - Có txt  → chuẩn hóa seg; bbox → polygon 4 điểm",
         "",
-        "Các bộ xử lý: CFD | Crack500 | DeepCrack | Roads_and_Bridges | Ultralytics_CrackSeg",
-        "Bỏ qua: METU | SDNET2018 | Concrete_and_Pavement",
+        "Bộ xử lý: CFD | Crack500 | DeepCrack | Roads_and_Bridges | Ultralytics_CrackSeg",
+        "Bỏ qua  : METU | SDNET2018 | Concrete_and_Pavement",
         "=" * 72,
         "",
     ]
@@ -98,16 +99,17 @@ def write_report_header():
     print(f"Báo cáo: {REPORT_FILE.resolve()}")
 
 
-# ================== YOLO-SEG CONVERT ==================
+# ================== CONVERT THỐNG NHẤT ==================
 def mask_to_yolo_seg(
     mask: np.ndarray,
     w: int,
     h: int,
-    min_area: int = 10,
-    approx_eps: float = 0.001,
-    min_points: int = 3,
+    min_area: int = MIN_AREA,
+    approx_eps: float = APPROX_EPS,
+    min_points: int = MIN_POINTS,
+    max_points: int = MAX_POINTS,
 ) -> str | None:
-    """Mask nhị phân → YOLO-seg polygons. Mỗi dòng: cls x1 y1 x2 y2 ..."""
+    """Mask → YOLO-seg polygon dày (bám pixel)."""
     if mask is None:
         return None
     if len(mask.shape) == 3:
@@ -120,20 +122,32 @@ def mask_to_yolo_seg(
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     lines = []
     for cnt in contours:
-        area = cv2.contourArea(cnt)
-        if area < min_area:
+        if cv2.contourArea(cnt) < min_area:
             continue
-        epsilon = approx_eps * cv2.arcLength(cnt, True)
-        approx = cv2.approxPolyDP(cnt, max(epsilon, 0.5), True)
-        if len(approx) < min_points:
+
+        if approx_eps <= 0:
+            pts = cnt.reshape(-1, 2)
+        else:
+            epsilon = max(approx_eps * cv2.arcLength(cnt, True), 0.3)
+            approx = cv2.approxPolyDP(cnt, epsilon, True)
+            pts = approx.reshape(-1, 2)
+
+        if len(pts) < min_points:
             continue
+
+        # Giới hạn số điểm (tránh label quá nặng)
+        if len(pts) > max_points:
+            idx = np.linspace(0, len(pts) - 1, max_points, dtype=int)
+            pts = pts[idx]
+
         parts = ["0"]
-        for p in approx.reshape(-1, 2):
+        for p in pts:
             x = min(max(float(p[0]) / w, 0.0), 1.0)
             y = min(max(float(p[1]) / h, 0.0), 1.0)
             parts.append(f"{x:.6f}")
             parts.append(f"{y:.6f}")
         lines.append(" ".join(parts))
+
     return "\n".join(lines) if lines else None
 
 
@@ -149,7 +163,7 @@ def convert_mask_pair_seg(img_path: Path, mask_path: Path) -> str | None:
 
 
 def bbox_line_to_seg_polygon(parts: list[str]) -> str | None:
-    """cls xc yc w h → polygon 4 điểm."""
+    """cls xc yc w h → polygon 4 điểm (cùng type seg)."""
     if len(parts) < 5:
         return None
     try:
@@ -169,14 +183,16 @@ def bbox_line_to_seg_polygon(parts: list[str]) -> str | None:
 
 def normalize_label_to_seg(text: str) -> str | None:
     """
-    - Polygon seg (>= 3 điểm) → giữ
-    - Bbox (cls x y w h) → polygon chữ nhật
+    Mọi txt → cùng type polygon seg:
+      - Đã là seg (>= 3 điểm) → chuẩn hóa số
+      - Bbox (5 số) → polygon 4 điểm
     """
     lines = []
     for line in text.splitlines():
         parts = line.strip().split()
         if not parts:
             continue
+        # Polygon seg
         if len(parts) >= 7:
             try:
                 cls = int(float(parts[0]))
@@ -187,6 +203,7 @@ def normalize_label_to_seg(text: str) -> str | None:
                 body = " ".join(f"{v:.6f}" for v in coords)
                 lines.append(f"{cls} {body}")
                 continue
+        # Bbox → polygon
         if len(parts) >= 5:
             poly = bbox_line_to_seg_polygon(parts)
             if poly:
@@ -254,23 +271,19 @@ def cfd_find_dir(root: Path, default_name: str, aliases: tuple) -> Path:
 
 def process_cfd() -> list[dict]:
     print("\n" + "=" * 60)
-    print("1) CFD — ảnh + mask → YOLO-Seg polygon")
+    print("1) CFD — mask → polygon seg (thống nhất)")
     print("=" * 60)
     log("\n" + "=" * 60, also_print=False)
-    log("1) CFD (mask → seg)", also_print=False)
+    log("1) CFD mask→seg", also_print=False)
 
     if not CFD_ROOT.exists():
         print("[ERROR] Không thấy", CFD_ROOT)
-        log(f"[ERROR] Không thấy {CFD_ROOT}", also_print=False)
         return []
 
     img_dir = cfd_find_dir(CFD_ROOT, "Images", ("images", "image", "img"))
     mask_dir = cfd_find_dir(CFD_ROOT, "Masks", ("masks", "mask", "lab", "labels"))
     print(f"Images: {img_dir} exists={img_dir.exists()}")
     print(f"Masks : {mask_dir} exists={mask_dir.exists()}")
-    log(f"Images: {img_dir}", also_print=False)
-    log(f"Masks : {mask_dir}", also_print=False)
-
     if not img_dir.exists() or not mask_dir.exists():
         return []
 
@@ -282,16 +295,11 @@ def process_cfd() -> list[dict]:
         if p.is_file() and p.suffix.lower() in IMG_EXTS_ALL:
             masks[cfd_normalize_stem(p.stem)] = p
 
-    matched_keys = sorted(set(images) & set(masks))
-    only_img = sorted(set(images) - set(masks))
-    only_mask = sorted(set(masks) - set(images))
+    matched = sorted(set(images) & set(masks))
+    ok_pairs, fail = [], 0
+    log(f"{'STT':>4} | {'Ảnh':<40} | {'Mask':<40} | OK", also_print=False)
 
-    log(f"{'STT':>4} | {'Ảnh':<40} | {'Mask':<40} | Convert", also_print=False)
-    log("-" * 100, also_print=False)
-
-    ok_pairs = []
-    fail = 0
-    for i, key in enumerate(matched_keys, start=1):
+    for i, key in enumerate(matched, start=1):
         img_p, mask_p = images[key], masks[key]
         yolo = convert_mask_pair_seg(img_p, mask_p)
         log(
@@ -303,10 +311,7 @@ def process_cfd() -> list[dict]:
         else:
             fail += 1
 
-    print(f"Số ảnh: {len(images)} | mask: {len(masks)} | khớp: {len(matched_keys)}")
-    print(f"Convert SEG OK: {len(ok_pairs)} | lỗi: {fail}")
-    print(f"Bỏ (thiếu cặp): ảnh={len(only_img)} mask={len(only_mask)}")
-    log(f"OK={len(ok_pairs)} fail={fail}", also_print=False)
+    print(f"Khớp={len(matched)} | SEG OK={len(ok_pairs)} | lỗi={fail}")
     return ok_pairs
 
 
@@ -315,9 +320,11 @@ CRACK500_ROOT = Path("data/raw/public/Crack500/CRACK500")
 if not CRACK500_ROOT.exists():
     CRACK500_ROOT = Path("data/raw/public/Crack500")
 
-FOLDERS_DATA = ("traindata", "testdata")
-FOLDERS_CROP = ("traincrop", "testcrop", "valcrop")
-FOLDERS_VALDATA = ("valdata",)
+FOLDERS_ALL = (
+    [("traindata", "DATA"), ("testdata", "DATA")]
+    + [(k, "CROP") for k in ("traincrop", "testcrop", "valcrop")]
+    + [("valdata", "VALDATA")]
+)
 IMG_EXTS = {".jpg", ".jpeg"}
 MASK_EXTS = {".png", ".bmp", ".tif", ".tiff"}
 
@@ -345,6 +352,7 @@ def strip_mask_suffix(stem: str) -> str:
 
 
 def collect_files(folder: Path):
+    """Chỉ lấy ảnh + mask (bỏ txt hỏng Crack500)."""
     images, masks = {}, {}
     for p in c500_list_files(folder):
         ext, stem = p.suffix.lower(), p.stem
@@ -357,45 +365,31 @@ def collect_files(folder: Path):
 
 def process_crack500() -> list[dict]:
     print("\n" + "=" * 60)
-    print("2) CRACK500 — mask → YOLO-Seg (bỏ txt hỏng)")
+    print("2) CRACK500 — mask → polygon seg (bỏ txt, thống nhất)")
     print("=" * 60)
     log("\n" + "=" * 60, also_print=False)
-    log("2) CRACK500 (mask → seg)", also_print=False)
-    print(f"Root: {CRACK500_ROOT} exists={CRACK500_ROOT.exists()}")
+    log("2) CRACK500 mask→seg", also_print=False)
     if not CRACK500_ROOT.exists():
+        print("[ERROR] Không thấy", CRACK500_ROOT)
         return []
 
     all_ok = []
-    all_folders = (
-        [(k, "DATA") for k in FOLDERS_DATA]
-        + [(k, "CROP") for k in FOLDERS_CROP]
-        + [(k, "VALDATA") for k in FOLDERS_VALDATA]
-    )
-
-    for key, mode in all_folders:
+    for key, mode in FOLDERS_ALL:
         folder = c500_find_dir(CRACK500_ROOT, key)
-        print(f"\n[{key}] {mode} — ảnh ∩ mask → seg")
-        log(f"\n[{key}] {mode}", also_print=False)
+        print(f"\n[{key}] {mode}")
         if folder is None:
             print("  [SKIP]")
             continue
-
         images, masks = collect_files(folder)
         img_l = {k.lower(): v for k, v in images.items()}
         mask_l = {k.lower(): v for k, v in masks.items()}
         matched = sorted(set(img_l) & set(mask_l))
         print(f"  img={len(images)} mask={len(masks)} khớp={len(matched)}")
-        log(f"  img={len(images)} mask={len(masks)} match={len(matched)}", also_print=False)
-        log(f"{'STT':>4} | {'Ảnh':<40} | {'Mask':<40} | Convert", also_print=False)
 
         ok = fail = 0
-        for i, lk in enumerate(matched, start=1):
+        for lk in matched:
             img_p, mask_p = img_l[lk], mask_l[lk]
             yolo = convert_mask_pair_seg(img_p, mask_p)
-            log(
-                f"{i:>4} | {img_p.name:<40} | {mask_p.name:<40} | {'YES' if yolo else 'NO'}",
-                also_print=False,
-            )
             if yolo:
                 all_ok.append({
                     "stem": f"{key}_{img_p.stem}",
@@ -437,10 +431,10 @@ def deepcrack_collect(folder: Path) -> dict:
 
 def process_deepcrack() -> list[dict]:
     print("\n" + "=" * 60)
-    print("3) DEEPCRACK — img + lab → YOLO-Seg")
+    print("3) DEEPCRACK — mask → polygon seg (thống nhất)")
     print("=" * 60)
     log("\n" + "=" * 60, also_print=False)
-    log("3) DEEPCRACK (mask → seg)", also_print=False)
+    log("3) DEEPCRACK mask→seg", also_print=False)
 
     if not DEEPCRACK_ROOT.exists():
         print("[ERROR] Không thấy", DEEPCRACK_ROOT)
@@ -448,7 +442,6 @@ def process_deepcrack() -> list[dict]:
 
     root = deepcrack_find_root(DEEPCRACK_ROOT)
     print(f"Root: {root}")
-    log(f"Root: {root}", also_print=False)
     all_ok = []
 
     for img_name, lab_name in DC_PAIRS:
@@ -460,17 +453,11 @@ def process_deepcrack() -> list[dict]:
         images, masks = deepcrack_collect(img_dir), deepcrack_collect(lab_dir)
         matched = sorted(set(images) & set(masks))
         print(f"  img={len(images)} mask={len(masks)} khớp={len(matched)}")
-        log(f"\n[{img_name}] match={len(matched)}", also_print=False)
-        log(f"{'STT':>4} | {'Ảnh':<40} | {'Mask':<40} | Convert", also_print=False)
 
         ok = fail = 0
-        for i, key in enumerate(matched, start=1):
+        for key in matched:
             img_p, mask_p = images[key], masks[key]
             yolo = convert_mask_pair_seg(img_p, mask_p)
-            log(
-                f"{i:>4} | {img_p.name:<40} | {mask_p.name:<40} | {'YES' if yolo else 'NO'}",
-                also_print=False,
-            )
             if yolo:
                 all_ok.append({
                     "stem": f"{img_name}_{img_p.stem}",
@@ -493,18 +480,16 @@ ROADS_SPLITS = ("train", "valid", "test")
 
 def process_roads_and_bridges() -> list[dict]:
     print("\n" + "=" * 60)
-    print("4) ROADS_AND_BRIDGES — giữ txt (seg hoặc bbox→polygon)")
+    print("4) ROADS — txt → polygon seg thống nhất (seg giữ / bbox→poly)")
     print("=" * 60)
     log("\n" + "=" * 60, also_print=False)
-    log("4) ROADS_AND_BRIDGES (txt → seg)", also_print=False)
+    log("4) ROADS txt→seg", also_print=False)
 
     if not ROADS_ROOT.exists():
         print("[ERROR] Không thấy", ROADS_ROOT)
-        log(f"[ERROR] Không thấy {ROADS_ROOT}", also_print=False)
         return []
 
     all_ok = []
-
     for split in ROADS_SPLITS:
         img_dir = ROADS_ROOT / split / "images"
         lbl_dir = ROADS_ROOT / split / "labels"
@@ -513,10 +498,6 @@ def process_roads_and_bridges() -> list[dict]:
             lbl_dir = ROADS_ROOT / "val" / "labels"
 
         print(f"\n[{split}]")
-        print(f"  images: {img_dir} exists={img_dir.exists()}")
-        print(f"  labels: {lbl_dir} exists={lbl_dir.exists()}")
-        log(f"\n[{split}] {img_dir} | {lbl_dir}", also_print=False)
-
         if not img_dir.exists() or not lbl_dir.exists():
             print("  [SKIP]")
             continue
@@ -531,28 +512,15 @@ def process_roads_and_bridges() -> list[dict]:
             for p in lbl_dir.iterdir()
             if p.is_file() and p.suffix.lower() == ".txt"
         }
-
         matched = sorted(set(images) & set(labels))
-        only_img = sorted(set(images) - set(labels))
-        only_lbl = sorted(set(labels) - set(images))
-
         print(f"  img={len(images)} txt={len(labels)} khớp={len(matched)}")
-        print(f"  thiếu label={len(only_img)} | thiếu ảnh={len(only_lbl)}")
-        log(
-            f"  match={len(matched)} only_img={len(only_img)} only_lbl={len(only_lbl)}",
-            also_print=False,
-        )
-        log(f"{'STT':>4} | {'Ảnh':<40} | {'Label':<40} | SEG OK", also_print=False)
 
-        ok = fail_txt = 0
-        for i, key in enumerate(matched, start=1):
+        ok = fail = 0
+        for key in matched:
             img_p, lbl_p = images[key], labels[key]
+            # LUÔN chạy qua normalize → cùng type
             yolo = normalize_label_to_seg(
                 lbl_p.read_text(encoding="utf-8", errors="ignore")
-            )
-            log(
-                f"{i:>4} | {img_p.name:<40} | {lbl_p.name:<40} | {'YES' if yolo else 'NO'}",
-                also_print=False,
             )
             if yolo:
                 all_ok.append({
@@ -562,43 +530,34 @@ def process_roads_and_bridges() -> list[dict]:
                 })
                 ok += 1
             else:
-                fail_txt += 1
-
-        print(f"  → SEG OK={ok} | txt không hợp lệ={fail_txt}")
-        log(f"  → OK={ok} fail_txt={fail_txt}", also_print=False)
+                fail += 1
+        print(f"  → SEG OK={ok} | lỗi={fail}")
 
     print(f"\nRoads_and_Bridges tổng: {len(all_ok)}")
     return all_ok
 
 
-# ================== ULTRALYTICS CRACKSEG ==================
+# ================== ULTRALYTICS ==================
 ULTRA_ROOT = Path("data/raw/public/Ultralytics_CrackSeg")
 ULTRA_SPLITS = ("train", "val", "test")
 
 
 def process_ultralytics_crackseg() -> list[dict]:
     print("\n" + "=" * 60)
-    print("5) ULTRALYTICS_CRACKSEG — giữ polygon gốc")
+    print("5) ULTRALYTICS — txt → polygon seg thống nhất (re-normalize)")
     print("=" * 60)
     log("\n" + "=" * 60, also_print=False)
-    log("5) ULTRALYTICS_CRACKSEG (seg txt gốc)", also_print=False)
+    log("5) ULTRALYTICS txt→seg", also_print=False)
 
     if not ULTRA_ROOT.exists():
         print("[ERROR] Không thấy", ULTRA_ROOT)
-        log(f"[ERROR] Không thấy {ULTRA_ROOT}", also_print=False)
         return []
 
     all_ok = []
-
     for split in ULTRA_SPLITS:
         img_dir = ULTRA_ROOT / "images" / split
         lbl_dir = ULTRA_ROOT / "labels" / split
-
         print(f"\n[{split}]")
-        print(f"  images: {img_dir} exists={img_dir.exists()}")
-        print(f"  labels: {lbl_dir} exists={lbl_dir.exists()}")
-        log(f"\n[{split}] {img_dir} | {lbl_dir}", also_print=False)
-
         if not img_dir.exists() or not lbl_dir.exists():
             print("  [SKIP]")
             continue
@@ -613,28 +572,15 @@ def process_ultralytics_crackseg() -> list[dict]:
             for p in lbl_dir.iterdir()
             if p.is_file() and p.suffix.lower() == ".txt"
         }
-
         matched = sorted(set(images) & set(labels))
-        only_img = sorted(set(images) - set(labels))
-        only_lbl = sorted(set(labels) - set(images))
-
         print(f"  img={len(images)} txt={len(labels)} khớp={len(matched)}")
-        print(f"  thiếu label={len(only_img)} | thiếu ảnh={len(only_lbl)}")
-        log(
-            f"  match={len(matched)} only_img={len(only_img)} only_lbl={len(only_lbl)}",
-            also_print=False,
-        )
-        log(f"{'STT':>4} | {'Ảnh':<40} | {'Label':<40} | SEG OK", also_print=False)
 
-        ok = fail_txt = 0
-        for i, key in enumerate(matched, start=1):
+        ok = fail = 0
+        for key in matched:
             img_p, lbl_p = images[key], labels[key]
+            # LUÔN convert/chuẩn hóa cùng type (không copy thô)
             yolo = normalize_label_to_seg(
                 lbl_p.read_text(encoding="utf-8", errors="ignore")
-            )
-            log(
-                f"{i:>4} | {img_p.name:<40} | {lbl_p.name:<40} | {'YES' if yolo else 'NO'}",
-                also_print=False,
             )
             if yolo:
                 all_ok.append({
@@ -644,10 +590,8 @@ def process_ultralytics_crackseg() -> list[dict]:
                 })
                 ok += 1
             else:
-                fail_txt += 1
-
-        print(f"  → SEG OK={ok} | txt không hợp lệ={fail_txt}")
-        log(f"  → OK={ok} fail_txt={fail_txt}", also_print=False)
+                fail += 1
+        print(f"  → SEG OK={ok} | lỗi={fail}")
 
     print(f"\nUltralytics_CrackSeg tổng: {len(all_ok)}")
     return all_ok
@@ -657,8 +601,8 @@ def process_ultralytics_crackseg() -> list[dict]:
 def main():
     write_report_header()
     print("=" * 60)
-    print("BUILD CLEAN PHASE 1 — YOLO-SEG (polygon)")
-    print("Scan → OVERVIEW → yes → primary train/val/test")
+    print("BUILD CLEAN PHASE 1 — YOLO-SEG 1 TYPE")
+    print("Mọi label → polygon seg thống nhất")
     print("=" * 60)
 
     approved: list[tuple[str, list]] = [
@@ -671,47 +615,32 @@ def main():
     approved = [(p, pairs) for p, pairs in approved if pairs]
 
     print("\n" + "=" * 60)
-    print("OVERVIEW — ĐỌC KỸ TRƯỚC KHI GHI PRIMARY (SEG)")
+    print("OVERVIEW")
     print("=" * 60)
-    log("\n" + "=" * 60, also_print=False)
-    log("OVERVIEW — PRIMARY YOLO-SEG", also_print=False)
-    log("=" * 60, also_print=False)
-
     total = 0
-    log(f"{'Bộ dữ liệu':<22} | {'Số mẫu':>8} | Ghi chú", also_print=False)
-    log("-" * 55, also_print=False)
     for prefix, pairs in approved:
         n = len(pairs)
         total += n
         print(f"  {prefix:22s} : {n:5d} mẫu")
-        log(f"{prefix:<22} | {n:>8} | YOLO-seg polygon", also_print=False)
+        log(f"{prefix}: {n} mẫu (YOLO-seg polygon)", also_print=False)
 
-    print(f"\n  TỔNG sẽ ghi primary     : {total}")
-    print(
-        f"  Tỷ lệ chia              : "
-        f"train={TRAIN_RATIO:.0%} val={VAL_RATIO:.0%} "
-        f"test={1 - TRAIN_RATIO - VAL_RATIO:.0%}"
-    )
-    print(f"  Output                 : {OUT_BASE}")
-    print(f"  Báo cáo                : {REPORT_FILE.resolve()}")
-    print("  Train model            : yolov8s-seg.pt")
-    log(f"\nTỔNG: {total}", also_print=False)
-    log(f"Output: {OUT_BASE.resolve()}", also_print=False)
+    print(f"\n  TỔNG     : {total}")
+    print(f"  Split    : train={TRAIN_RATIO:.0%} val={VAL_RATIO:.0%} test={1-TRAIN_RATIO-VAL_RATIO:.0%}")
+    print(f"  Output   : {OUT_BASE}")
+    print(f"  Báo cáo  : {REPORT_FILE.resolve()}")
 
     if total == 0:
-        print("\nKhông có dữ liệu. Dừng.")
-        log("Không có dữ liệu — dừng.", also_print=False)
+        print("Không có dữ liệu. Dừng.")
         return
 
-    ans = input("\n>>> Gõ yes để XUẤT primary SEG (train/val/test): ").strip().lower()
+    ans = input("\n>>> Gõ yes để XUẤT primary SEG: ").strip().lower()
     if ans != "yes":
-        print("Đã hủy. Không ghi primary.")
-        log("User hủy — không ghi primary.", also_print=False)
+        print("Đã hủy.")
         return
 
     if OUT_BASE.exists():
         shutil.rmtree(OUT_BASE)
-        print("  Đã xóa primary cũ (tránh lẫn label detect).")
+        print("  Đã xóa primary cũ.")
 
     written = {"train": 0, "val": 0, "test": 0}
     for prefix, pairs in approved:
@@ -722,22 +651,12 @@ def main():
             f"  Đã ghi {prefix}: "
             f"train={counts['train']} val={counts['val']} test={counts['test']}"
         )
-        log(
-            f"Đã ghi {prefix}: "
-            f"train={counts['train']} val={counts['val']} test={counts['test']}",
-            also_print=False,
-        )
 
-    total_w = sum(written.values())
-    print(f"\n✅ HOÀN TẤT SEG — {total_w} mẫu")
-    print(f"   train={written['train']} | val={written['val']} | test={written['test']}")
-    print(f"   {OUT_BASE.resolve()}")
-    print(f"   Báo cáo: {REPORT_FILE.resolve()}")
-    log(
-        f"\n✅ HOÀN TẤT SEG — "
-        f"train={written['train']} val={written['val']} test={written['test']}",
-        also_print=False,
+    print(
+        f"\n✅ HOÀN TẤT — "
+        f"train={written['train']} val={written['val']} test={written['test']}"
     )
+    print(f"   {OUT_BASE.resolve()}")
 
     yaml_path = OUT_BASE / "data.yaml"
     yaml_path.write_text(
@@ -754,10 +673,7 @@ def main():
         encoding="utf-8",
     )
     print(f"   data.yaml: {yaml_path.resolve()}")
-    print("\n   Train Kaggle:")
-    print('   model = YOLO("yolov8s-seg.pt")')
-    print("   model.train(data=data.yaml, epochs=50, imgsz=640, batch=8)")
-    log(f"data.yaml: {yaml_path.resolve()}", also_print=False)
+    print('   Train: YOLO("yolov8s-seg.pt")')
 
 
 if __name__ == "__main__":

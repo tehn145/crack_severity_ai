@@ -1,0 +1,8 @@
+# Auto-generated for local train
+path: D:/crack_severity_ai/data/processed/phase1/primary
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: crack

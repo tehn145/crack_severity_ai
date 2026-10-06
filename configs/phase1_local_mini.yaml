@@ -1,0 +1,8 @@
+# Mini set — train thử CPU
+path: D:/crack_severity_ai/data/processed/phase1/primary_mini
+train: images/train
+val: images/val
+test: images/val
+
+names:
+  0: crack
