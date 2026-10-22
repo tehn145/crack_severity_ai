@@ -20,9 +20,10 @@ Mỗi subset đều có:
   labels/{train,val,test}   # YOLO format
 
 ## Trạng thái hiện tại (cập nhật khi có thay đổi)
-- Đã gộp nhiều nguồn → khoảng 66k ảnh (chưa sạch)
-- primary đã build được ~9.2k ảnh (image-label khớp)
-- Đang rà soát / làm sạch tiếp
+- Đã quét 5 bộ có mask/txt (~21k file): 3DCrack_v1, crack_segmentation_dataset, DeepCrack, Roads_and_Bridges, Ultralytics_CrackSeg
+- primary đã build chuẩn hóa: 18.790 ảnh (train 14.972 / val 1.921 / test 1.897), nhãn YOLO polygon class 0 = crack, khớp image-label 100%, khử trùng md5
+- Ảnh âm (background, label rỗng): 1.353 ảnh tách riêng ở data/processed/phase1/negatives/
+- Bundle Kaggle: outputs/kaggle/phase1_primary.zip (primary + ảnh âm gộp split + data.yaml) — dùng scripts/package_kaggle_phase1.py để tạo lại
 - Phase 2: mới ở giai đoạn thiết kế hướng tiếp cận
 
 ## Quyết định kỹ thuật đã chốt

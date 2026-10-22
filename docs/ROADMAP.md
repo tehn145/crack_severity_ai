@@ -4,12 +4,13 @@
 - Thu thập dataset công khai
 - Xây pipeline download / inspect / convert
 - Build được primary (image-label khớp)
+- Chuẩn hóa toàn bộ nguồn (mask + txt) về YOLO polygon, build primary 18.790 ảnh + 1.353 ảnh âm, chia split 80/10/10
+- Đóng gói bundle Kaggle (data.yaml + README + zip)
 - Nghiên cứu hướng Phase 2 (đặc trưng vết nứt + ngữ cảnh single/multi plane)
 - Khảo sát ACI 224R-01 và TCVN 9381:2012
 
 ## Đang làm
-- Rà soát và làm sạch dữ liệu sau khi merge (~66k ảnh)
-- Chuẩn bị / đang train Phase 1 trên primary
+- Train Phase 1 trên Kaggle bằng bundle outputs/kaggle/phase1_primary.zip (18.790 ảnh primary + 1.353 ảnh âm)
 
 ## Tiếp theo
 - Hoàn tất đánh giá Phase 1 (metrics + nhận xét false positive)
