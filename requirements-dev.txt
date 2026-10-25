@@ -1,0 +1,10 @@
+# Dependencies cho CI test (nhẹ — ultralytics/torch lazy-load, không cần cho unit test)
+fastapi>=0.115
+uvicorn>=0.30
+python-multipart>=0.0.9
+opencv-python-headless>=4.9
+numpy>=1.26
+pillow>=10.0
+pytest>=8.0
+httpx>=0.27
+ruff>=0.6

@@ -1,0 +1,26 @@
+# Git
+.git/
+.gitignore
+
+# Dữ liệu lớn — không đưa vào build context
+data/
+outputs/
+runs/
+*.pt
+*.pth
+*.onnx
+weights/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

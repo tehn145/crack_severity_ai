@@ -1,0 +1,26 @@
+services:
+  crack-api:
+    build: .
+    container_name: crack-severity-api
+    ports:
+      - "7860:7860"
+    volumes:
+      # Nạp weight từ máy host vào container (không cần build lại khi đổi model)
+      - ./weights/phase1:/srv/weights:ro
+      # Giữ DB + ảnh hồ sơ khi container xoá
+      - crack_data:/srv/app/data
+    environment:
+      - MODEL_PATH=/srv/weights/best.pt
+      # Deploy HF Spaces thì dùng (weight tải runtime từ Hub):
+      # - MODEL_REPO=tehn145/crack-phase1
+      # - HF_TOKEN=${HF_TOKEN}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:7860/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  crack_data:

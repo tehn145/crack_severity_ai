@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crack Severity AI — Nền tảng kiểm định vết nứt công trình</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" onerror="window.__noCharts=true"></script>
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 12h.01M12 12h.01M15 12h.01" stroke-linecap="round"/>
+        <path d="M6 16l3-2 2 1 3-3 2 1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div><b>Crack Severity AI</b><small>Nền tảng kiểm định vết nứt · Phase 1</small></div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <span class="env-badge">MÔI TRƯỜNG DEMO</span>
+    <div class="user-chip" id="user-chip">
+      <select id="role" title="Vai trò (demo)">
+        <option value="engineer">🧑‍🔧 Kỹ sư kiểm định</option>
+        <option value="manager">👔 Quản lý duyệt</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <nav>
+      <a href="#/dashboard" class="active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="#/inspect">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-width="2.2"/></svg>
+        Kiểm tra mới
+      </a>
+      <a href="#/inspections">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round" stroke-width="2"/><circle cx="19" cy="18" r="2.5"/></svg>
+        Hồ sơ kiểm định <span id="nav-count" class="pill" hidden></span>
+      </a>
+      <a href="#/analytics">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"/></svg>
+        Phân tích & Model
+      </a>
+      <a href="#/settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.1 2.1m10 10 2.1 2.1m0-14.2-2.1 2.1m-10 10-2.1 2.1" stroke-linecap="round"/></svg>
+        Thiết lập
+      </a>
+    </nav>
+    <div class="model-card">
+      <div class="mc-head"><span class="dot" id="health-dot"></span> Model Phase 1</div>
+      <div class="mc-row" id="health-status">đang kiểm tra…</div>
+      <div class="mc-row muted" id="app-version">v?</div>
+    </div>
+    <div class="sidebar-foot">Thang severity đề xuất<br>ACI 224R-01 · TCVN 9381:2012</div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main id="main">
+
+    <!-- ===== VIEW: DASHBOARD ===== -->
+    <section id="view-dashboard" class="view">
+      <header class="page-head">
+        <div><h1>Dashboard</h1><p>Tổng quan hoạt động kiểm định & hiệu năng hệ thống</p></div>
+        <a class="btn primary" href="#/inspect">＋ Phiếu kiểm tra mới</a>
+      </header>
+      <div id="kpi-row" class="kpi-row"></div>
+      <div class="charts-row">
+        <div class="card chart-card"><h2>Phân bố mức độ nghiêm trọng</h2><div class="chart-box"><canvas id="ch-sev"></canvas></div></div>
+        <div class="card chart-card"><h2>Vết nứt theo cấu kiện</h2><div class="chart-box"><canvas id="ch-comp"></canvas></div></div>
+        <div class="card chart-card"><h2>Lượt kiểm tra 6 tháng</h2><div class="chart-box"><canvas id="ch-trend"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Hồ sơ gần đây</h2><a class="link" href="#/inspections">Xem tất cả →</a></div>
+        <div class="table-wrap">
+          <table id="recent-table">
+            <thead><tr><th>Mã</th><th>Thời gian</th><th>Dự án</th><th>Tầng</th><th>Cấu kiện</th><th>Vết nứt</th><th>Trạng thái</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: KIỂM TRA MỚI (WIZARD) ===== -->
+    <section id="view-inspect" class="view" hidden>
+      <header class="page-head">
+        <div><h1>Phiếu kiểm tra vết nứt</h1><p>Quy trình 4 bước chuẩn: thông tin → ảnh → phân tích AI → nộp hồ sơ</p></div>
+      </header>
+
+      <div class="wizard-steps" id="wiz-steps">
+        <div class="wstep active" data-step="1"><span class="wnum">1</span><div><b>Thông tin</b><small>Dự án, vị trí</small></div></div>
+        <div class="wline"></div>
+        <div class="wstep" data-step="2"><span class="wnum">2</span><div><b>Ảnh hiện trường</b><small>Tải / chụp / dán</small></div></div>
+        <div class="wline"></div>
+        <div class="wstep" data-step="3"><span class="wnum">3</span><div><b>Phân tích AI</b><small>Phát hiện & đo lường</small></div></div>
+        <div class="wline"></div>
+        <div class="wstep" data-step="4"><span class="wnum">4</span><div><b>Nộp hồ sơ</b><small>Rà soát & gửi duyệt</small></div></div>
+      </div>
+
+      <!-- Bước 1 -->
+      <div class="card wpane" id="wpane-1">
+        <h2>Thông tin công trình</h2>
+        <div class="form-row">
+          <div class="form-pair">
+            <label>Dự án / Tòa nhà <select id="project"></select></label>
+            <button class="btn ghost" id="btn-new-project" style="align-self:end;margin-bottom:10px">＋ Dự án mới</button>
+          </div>
+          <div class="form-pair">
+            <label>Tầng <input id="floor" placeholder="VD: T12"></label>
+            <label>Cấu kiện <select id="component"></select></label>
+          </div>
+          <div class="form-pair">
+            <label>Người kiểm tra <input id="engineer" placeholder="Họ tên kỹ sư"></label>
+            <label>Thang đo — GSD (mm/pixel) <input id="gsd" type="number" step="0.001" min="0" placeholder="Bỏ trống nếu chưa hiệu chuẩn"></label>
+          </div>
+          <label>Ghi chú hiện trường <textarea id="note" rows="2" placeholder="Vị trí chi tiết, điều kiện quan sát..."></textarea></label>
+        </div>
+        <div class="hint">💡 GSD = kích thước vật chuẩn (mm) ÷ số pixel của nó trong ảnh. Có GSD → hệ thống tự phân loại mức độ nghiêm trọng theo thang ACI/TCVN.</div>
+        <div class="wiz-nav"><span></span><button class="btn primary" id="w1-next">Tiếp theo →</button></div>
+      </div>
+
+      <!-- Bước 2 -->
+      <div class="card wpane" id="wpane-2" hidden>
+        <h2>Ảnh hiện trường</h2>
+        <div id="dropzone" class="dropzone">
+          <div class="dz-icon">📷</div>
+          <p><b>Kéo thả ảnh</b> hoặc dán (Ctrl+V) từ clipboard</p>
+          <input type="file" id="file" accept="image/*" capture="environment" hidden>
+          <div class="btn-row">
+            <button class="btn" onclick="document.getElementById('file').click()">Chọn ảnh / chụp camera</button>
+            <button class="btn ghost" id="btn-demo">Ảnh mẫu test set</button>
+          </div>
+          <img id="preview" hidden alt="">
+        </div>
+        <div class="param-row">
+          <label>Ngưỡng conf <span id="confVal" class="mono">0.25</span><input type="range" id="conf" min="0.05" max="0.9" step="0.05" value="0.25"></label>
+          <label>Độ phân giải suy luận
+            <select id="imgsz"><option value="640" selected>640 (nhanh)</option><option value="960">960</option><option value="1280">1280 (mịn nhất)</option></select>
+          </label>
+        </div>
+        <div class="wiz-nav"><button class="btn ghost" data-goto="1">← Quay lại</button><button class="btn primary" id="w2-next">Tiếp theo →</button></div>
+      </div>
+
+      <!-- Bước 3 -->
+      <div class="card wpane" id="wpane-3" hidden>
+        <h2>Kết quả phân tích Phase 1</h2>
+        <div id="result-empty" class="empty-state"><div class="dz-icon">🛰️</div><p>Bấm <b>Chạy phân tích</b> để bắt đầu.</p></div>
+        <div id="result" hidden>
+          <div id="summary" class="chips"></div>
+          <div class="viewer" id="viewer">
+            <img id="annotated" alt="Kết quả">
+            <canvas id="overlay"></canvas>
+            <div class="viewer-toolbar">
+              <button class="btn tiny" id="tg-mask">Mask: BẬT</button>
+              <button class="btn tiny" id="tg-box">Khung: BẬT</button>
+              <button class="btn tiny" id="btn-dl">⬇️ PNG</button>
+            </div>
+          </div>
+          <h3>Vết nứt phát hiện <span class="hint">— bấm dòng để tô sáng trên ảnh</span></h3>
+          <div class="table-wrap">
+            <table id="det-table">
+              <thead><tr><th>#</th><th>Conf</th><th>Dài (px)</th><th>Rộng TB (px)</th><th>Rộng max (px)</th><th>Diện tích (px²)</th><th>Góc (°)</th><th>Mức độ (đề xuất)</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="severity-legend" class="legend" hidden><b>Thang đề xuất:</b><span id="legend-items"></span></div>
+          <p class="phase2-note">⚙️ Mức độ nghiêm trọng do <b>quy tắc Phase 2 (bản đề xuất)</b> tính từ bề rộng × GSD, tham chiếu ACI 224R-01 / TCVN 9381:2012 — chờ phê duyệt chính thức. Thiếu GSD → “chưa định lượng”.</p>
+        </div>
+        <div class="wiz-nav"><button class="btn ghost" data-goto="2">← Quay lại</button><button class="btn primary" id="btn-run">🔍 Chạy phân tích</button><button class="btn primary" id="w3-next" disabled>Nộp hồ sơ →</button></div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <!-- Bước 4 -->
+      <div class="card wpane" id="wpane-4" hidden>
+        <h2>Rà soát & nộp hồ sơ</h2>
+        <div id="review-box"></div>
+        <div class="form-row" style="margin-top:12px">
+          <label>Hành động sau khi lưu
+            <select id="save-status">
+              <option value="submitted">Nộp chờ quản lý duyệt (khuyến nghị)</option>
+              <option value="draft">Lưu bản nháp</option>
+            </select>
+          </label>
+        </div>
+        <div class="wiz-nav"><button class="btn ghost" data-goto="3">← Quay lại</button><button class="btn primary big" id="btn-save">💾 Hoàn tất hồ sơ</button></div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: HỒ SƠ ===== -->
+    <section id="view-inspections" class="view" hidden>
+      <header class="page-head">
+        <div><h1>Hồ sơ kiểm định</h1><p>Quản lý, lọc và phê duyệt hồ sơ</p></div>
+        <div class="head-actions">
+          <button class="btn ghost" id="btn-refresh">🔄 Làm mới</button>
+          <a class="btn" href="/api/inspections/export.csv" download>⬇️ Xuất CSV</a>
+        </div>
+      </header>
+      <div class="card">
+        <div class="filters">
+          <input id="f-search" placeholder="🔎 Tìm tòa nhà / tầng / mã...">
+          <select id="f-status"><option value="">— Tất cả trạng thái —</option><option value="draft">Bản nháp</option><option value="submitted">Chờ duyệt</option><option value="approved">Đã duyệt</option></select>
+          <select id="f-component"><option value="">— Tất cả cấu kiện —</option></select>
+        </div>
+        <div class="table-wrap">
+          <table id="ins-table">
+            <thead><tr><th>Mã</th><th>Ảnh</th><th>Thời gian</th><th>Dự án/Tòa nhà</th><th>Tầng</th><th>Cấu kiện</th><th>Kỹ sư</th><th>Vết nứt</th><th>Trạng thái</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="ins-empty" class="empty-state" hidden><p>Không có hồ sơ khớp bộ lọc.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: PHÂN TÍCH & MODEL ===== -->
+    <section id="view-analytics" class="view" hidden>
+      <header class="page-head"><div><h1>Phân tích & Hiệu năng Model</h1><p>Số liệu benchmark thực tế của hệ thống (v1 baseline)</p></div></header>
+      <div id="analytics-body" class="analytics-grid"></div>
+    </section>
+
+    <!-- ===== VIEW: THIẾT LẬP ===== -->
+    <section id="view-settings" class="view" hidden>
+      <header class="page-head"><div><h1>Thiết lập</h1><p>Thang severity, tham số model, vai trò</p></div></header>
+      <div class="grid-2col">
+        <div class="card"><h2>Thang mức độ nghiêm trọng (đề xuất)</h2><div id="scale-detail"></div><p class="hint" style="margin-top:10px">Chỉnh ngưỡng sau khi team chốt — file <code>app/severity.py</code>, nguồn: <code>docs/severity_definition.md</code>.</p></div>
+        <div class="card"><h2>Tham số suy luận mặc định</h2><div id="settings-model"></div><p class="hint" style="margin-top:10px">Đổi qua biến môi trường: <code>DEFAULT_CONF</code>, <code>DEFAULT_IMGSZ</code>, <code>MODEL_PATH</code>, <code>MODEL_REPO</code>.</p></div>
+        <div class="card"><h2>Vai trò (demo)</h2>
+          <div class="settings-roles">
+            <div><b>🧑‍🔧 Kỹ sư kiểm định</b><p>Thực hiện phiếu kiểm tra, nộp hồ sơ chờ duyệt.</p></div>
+            <div><b>👔 Quản lý</b><p>Thực hiện phiếu kiểm tra, nộp hồ sơ chờ duyệt.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ MODAL CHI TIẾT HỒ SƠ ============ -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <b id="modal-title">Chi tiết hồ sơ</b>
+      <button class="btn tiny" onclick="document.getElementById('modal').hidden=true">✕ Đóng</button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
