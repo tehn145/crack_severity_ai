@@ -1,30 +1,47 @@
-"""Phân loại mức độ nghiêm trọng — RULE-BASED theo bản ĐỀ XUẤT thang 4 mức.
+"""Phase 2 — Phân loại mức độ nghiêm trọng ĐA YẾU TỐ (rule-based).
 
-Nguồn: docs/severity_definition.md (ACI 224R-01 + TCVN 9381:2012).
-TRẠNG THÁI: bản đề xuất chờ team chốt — mọi output đều gắn cờ `proposal: True`
-và UI hiển thị disclaimer. Khi team chốt, chỉ sửa bảng THRESHOLDS_MM tại đây.
+Nguồn: docs/standards/severity_definition.md — ACI 224R-01 + TCVN 9381:2012.
 
-Bề rộng dùng để phân loại: bề rộng TRUNG BÌNH (area_px / length_px × GSD).
-Không có GSD (mm/px) → KHÔNG phân loại (trả None, không đoán mò).
+Nguyên tắc thiết kế (giải thích được với hội đồng):
+  1. **Bề rộng LỚN NHẤT là neo chuẩn ACI** — tra thang L0–L3 theo width_max × GSD.
+  2. Bề rộng một mình KHÔNG ĐỦ: vết dài nhưng mảnh, hoặc vết mảnh nhưng đậm/sâu
+     vẫn đáng lo. Vì vậy các yếu tố sau MỖI YẾU TỐ góp +1 mức (tối đa +2, trừ
+     through_member mà đẩy thẳng L3):
+       - CHIỀU DÀI: length_mm ≥ LENGTH_BUMP_MM (vết lan dài — extent của hư hỏng)
+       - ĐỘ ĐẬM: contrast_ratio ≥ CONTRAST_BUMP (vết tối hơn nền rõ rệt —
+         proxy cho độ sâu; vết cạn/hairline bề mặt thường mờ)
+       - LỚP B: branching / multi_plane (mạng lưới nứt, giao cắt)
+  3. through_member (kỹ sư đánh dấu) → L3 tuyệt đối.
+  4. Mọi yếu tố làm tăng mức đều được trả về trong `factors` để hiển thị lý do.
+  5. Thiếu GSD → KHÔNG phân loại (không đoán mò).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-PROPOSAL = True  # cờ toàn cục: thang chưa được team phê duyệt chính thức
+PROPOSAL = True  # False khi team nghiệm thu chính thức thang
 
-# (level, tên hiển thị, màu UI, ngưỡng trên [mm, lấy mức <])
+# Ngưỡng yếu tố bổ sung (đề xuất, chỉnh tại đây khi có dữ liệu thực đo)
+LENGTH_BUMP_MM = 300.0   # vết dài từ 300mm coi là lan rộng
+CONTRAST_BUMP = 0.30     # vết tối hơn nền 30% coi là đậm (nghi sâu)
+
 LEVELS: list[dict[str, Any]] = [
-    {"level": 0, "name": "Hairline", "vi": "Nứt tóc — vô hại", "color": "#7f8c8d", "max_mm": 0.1},
-    {"level": 1, "name": "Minor", "vi": "Nhẹ — theo dõi định kỳ", "color": "#27ae60", "max_mm": 0.3},
-    {"level": 2, "name": "Moderate", "vi": "Trung bình — cần đánh giá", "color": "#f39c12", "max_mm": 1.0},
-    {"level": 3, "name": "Severe", "vi": "Nghiêm trọng — kiểm tra kết cấu ngay", "color": "#c0392b", "max_mm": None},
+    {"level": 0, "name": "Hairline", "vi": "Nứt tóc — vô hại", "color": "#94a3b8", "max_mm": 0.1},
+    {"level": 1, "name": "Minor", "vi": "Nhẹ — theo dõi định kỳ", "color": "#16a34a", "max_mm": 0.3},
+    {"level": 2, "name": "Moderate", "vi": "Trung bình — cần đánh giá", "color": "#d97706", "max_mm": 1.0},
+    {"level": 3, "name": "Severe", "vi": "Nghiêm trọng — kiểm tra kết cấu ngay", "color": "#dc2626", "max_mm": None},
 ]
 
 SCALE_META = {
     "proposal": PROPOSAL,
-    "reference": "ACI 224R-01 / TCVN 9381:2012 (bản đề xuất — chờ team chốt)",
+    "reference": "ACI 224R-01 / TCVN 9381:2012 (đã chốt đề xuất 2026-10-23)",
+    "width_basis": "max",
+    "factors": {
+        "length_bump_mm": LENGTH_BUMP_MM,
+        "contrast_bump": CONTRAST_BUMP,
+        "max_adjust": 2,
+    },
     "levels": [
         {"level": lv["level"], "name": lv["name"], "vi": lv["vi"],
          "color": lv["color"], "range": (
@@ -34,32 +51,73 @@ SCALE_META = {
 }
 
 
+def _level_of(width_mm: float) -> dict[str, Any]:
+    return next(
+        (lv for lv in LEVELS if lv["max_mm"] is None or width_mm < lv["max_mm"]),
+        LEVELS[-1],
+    )
+
+
 def classify(
     width_mean_px: float | None,
     gsd_mm_per_px: float | None,
+    width_max_px: float | None = None,
     length_px: float | None = None,
-    multi_plane: bool = False,
     branching: bool = False,
+    multi_plane: bool = False,
+    through_member: bool = False,
+    contrast_ratio: float | None = None,
 ) -> dict | None:
-    """Trả về kết quả phân loại hoặc None nếu chưa đủ dữ liệu định lượng."""
-    if width_mean_px is None or gsd_mm_per_px is None or gsd_mm_per_px <= 0:
+    """Phân loại đa yếu tố. Trả None nếu thiếu GSD / thiếu bề rộng."""
+    if gsd_mm_per_px is None or gsd_mm_per_px <= 0:
         return None
-    width_mm = width_mean_px * gsd_mm_per_px
-    level = next((lv for lv in LEVELS if lv["max_mm"] is None or width_mm < lv["max_mm"]), LEVELS[-1])
-    bumped = False
-    # Điều chỉnh +1 mức theo Lớp B / mật độ (theo mục 4 severity_definition.md)
-    if (multi_plane or branching) and level["level"] < 3:
-        level = LEVELS[level["level"] + 1]
-        bumped = True
+    if width_mean_px is None and width_max_px is None:
+        return None
+
+    w_mean_mm = (width_mean_px or 0.0) * gsd_mm_per_px
+    w_max_mm = (width_max_px if width_max_px is not None else width_mean_px or 0.0) * gsd_mm_per_px
+    length_mm = (length_px or 0.0) * gsd_mm_per_px
+
+    if through_member:
+        lv = LEVELS[3]
+        basis = "through_member"
+        factors = ["nứt xuyên cấu kiện (kỹ sư đánh dấu)"]
+        bumps = 0
+    else:
+        lv = _level_of(w_max_mm)
+        base_idx = lv["level"]
+        basis = "mm_max"
+        factors = []
+        bumps = 0
+        if length_mm >= LENGTH_BUMP_MM:
+            factors.append(f"vết dài {length_mm:.0f} mm ≥ {LENGTH_BUMP_MM:.0f} mm")
+            bumps += 1
+        if contrast_ratio is not None and contrast_ratio >= CONTRAST_BUMP:
+            factors.append(f"vết đậm (nền tối hơn {contrast_ratio:.0%}) — nghi sâu")
+            bumps += 1
+        if branching or multi_plane:
+            which = "rẽ nhánh" if branching and not multi_plane else (
+                "đa mặt phẳng" if multi_plane and not branching else "rẽ nhánh + đa mặt phẳng")
+            factors.append(which)
+            bumps += 1
+        bumps = min(bumps, 2)  # tối đa +2 mức từ yếu tố bổ sung
+        lv = LEVELS[min(3, base_idx + bumps)]
+
     return {
         "proposal": PROPOSAL,
-        "level": level["level"],
-        "name": level["name"],
-        "vi": level["vi"],
-        "color": level["color"],
-        "width_mm": round(width_mm, 3),
-        "length_mm": round(length_px * gsd_mm_per_px, 1) if length_px else None,
+        "level": lv["level"],
+        "name": lv["name"],
+        "vi": lv["vi"],
+        "color": lv["color"],
+        "width_mm": round(w_max_mm, 3),
+        "width_mean_mm": round(w_mean_mm, 3),
+        "length_mm": round(length_mm, 1) if length_px else None,
+        "contrast": round(contrast_ratio, 3) if contrast_ratio is not None else None,
         "gsd_mm_per_px": gsd_mm_per_px,
-        "adjusted_up": bumped,
-        "basis": "mm",
+        "bumps": bumps,
+        "factors": factors,
+        "through_member": through_member,
+        "branching": branching,
+        "multi_plane": multi_plane,
+        "basis": basis,
     }

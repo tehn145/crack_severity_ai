@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"secondary-fixed":"#dbe1ff","on-error":"#ffffff","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-surface-variant":"#3f4850","error-container":"#ffdad6","tertiary":"#00628d","surface-tint":"#006398","inverse-primary":"#93ccff","primary":"#006194","surface-bright":"#f8f9ff","surface-container-highest":"#d3e4fe","surface-container-high":"#dce9ff","primary-container":"#007bb9","outline-variant":"#bfc7d2","on-tertiary-fixed-variant":"#004c6e","secondary-fixed-dim":"#b4c5ff","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#003ea8","primary-fixed":"#cce5ff","on-tertiary":"#ffffff","inverse-surface":"#213145","surface-container-low":"#eff4ff","primary-fixed-dim":"#93ccff","on-surface":"#0b1c30","tertiary-fixed":"#c9e6ff","on-primary-fixed":"#001d31","on-primary-fixed-variant":"#004b73","on-secondary-container":"#fefcff","on-background":"#0b1c30","error":"#ba1a1a","surface":"#f8f9ff","on-primary":"#ffffff","surface-container":"#e5eeff","tertiary-container":"#007cb1","on-secondary":"#ffffff","secondary-container":"#316bf3","outline":"#707881","tertiary-fixed-dim":"#89ceff","background":"#f8f9ff","on-error-container":"#93000a","on-tertiary-fixed":"#001e2f","secondary":"#0051d5","on-secondary-fixed":"#00174b","inverse-on-surface":"#eaf1ff","surface-variant":"#d3e4fe","on-primary-container":"#fdfcff"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin":"2rem","space-xl":"2.5rem","space-xs":"0.25rem","margin-mobile":"1rem","space-sm":"0.5rem","gutter-mobile":"0.75rem","gutter":"1.25rem","space-lg":"1.5rem","space-md":"1rem"},"fontFamily":{"body-lg":["Inter"],"label-md":["Space Grotesk"],"headline-xl-mobile":["Space Grotesk"],"display-hero-mobile":["Space Grotesk"],"headline-sm":["Space Grotesk"],"headline-xl":["Space Grotesk"],"headline-lg":["Space Grotesk"],"body-sm":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["Space Grotesk"],"code-telemetry":["Space Grotesk"],"display-hero":["Space Grotesk"],"label-sm":["Space Grotesk"],"body-md":["Inter"]},"fontSize":{"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-hero-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"code-telemetry":["13px",{"lineHeight":"18px","letterSpacing":"-0.01em","fontWeight":"500"}],"display-hero":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low border-r border-outline-variant/30 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="flex flex-col h-full"><div class="h-16 px-space-md flex items-center gap-space-sm border-b border-outline-variant/20 bg-surface-container-lowest/60"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">radar</span></div><div class="flex flex-col"><span class="font-label-md text-label-md tracking-tight text-on-surface uppercase font-bold leading-none">INFRA-GUARD</span><span class="font-code-telemetry text-[10px] text-primary uppercase tracking-widest leading-none mt-1 font-semibold">CivilVision OS</span></div></div><div class="px-space-md py-space-sm border-b border-outline-variant/20 bg-surface-container-low"><div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1"><span>Diagnostic Node</span><span class="flex items-center gap-1 text-primary font-code-telemetry text-[10px]"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>ONLINE</span></div><div class="font-code-telemetry text-code-telemetry text-on-surface font-medium truncate">US-EAST-VA // GIGASTORE-01</div></div><div class="flex-1 overflow-y-auto px-space-sm py-space-md space-y-space-xs"><div class="px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Operational Console</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="structural-review" href="#"><span class="material-symbols-outlined text-[19px]">biotech</span><span>Structural Review Module</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="building-registry" href="#"><span class="material-symbols-outlined text-[19px]">domain</span><span>Building Registry</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="field-workspace-logs" href="#"><span class="material-symbols-outlined text-[19px]">assignment_turned_in</span><span>Field Workspace &amp; Logs</span></a></nav><div class="pt-space-md px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Procurement &amp; Talent</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-all bg-primary text-on-primary shadow-sm font-semibold rounded-lg" data-path="engineering-marketplace" href="#"><span class="material-symbols-outlined text-[19px]">verified_user</span><span>Engineering Marketplace</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="materials-sensor-store" href="#"><span class="material-symbols-outlined text-[19px]">sensors</span><span>Materials &amp; Sensor Store</span></a></nav><div class="pt-space-md px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Governance &amp; Support</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="billing-vip-licenses" href="#"><span class="material-symbols-outlined text-[19px]">workspace_premium</span><span>Billing &amp; VIP Licenses</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="help-ai-assistant" href="#"><span class="material-symbols-outlined text-[19px]">smart_toy</span><span>Help &amp; AI Assistant Hub</span></a></nav></div><div class="p-space-md border-t border-outline-variant/30 bg-surface-container-lowest/80"><div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container border border-outline-variant/40"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary text-[20px]">memory</span><div class="flex flex-col"><span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Inference Engine</span><span class="font-code-telemetry text-code-telemetry text-on-surface font-semibold">YOLOv9-Crack v4.2</span></div></div><span class="font-code-telemetry text-[11px] text-primary px-1.5 py-0.5 rounded bg-surface-container-highest">99.4%</span></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.02)] z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span><input class="w-full h-9 pl-9 pr-space-md bg-surface-container-lowest border border-outline-variant/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Query asset UUID, bridge stationing, or shear crack telemetry..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>SOC2 TYPE II</span><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span>LEO GNSS 14/14</span><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="material-symbols-outlined text-[13px] text-secondary">verified</span>PE CERTIFIED</span></div><div class="h-6 w-px bg-outline-variant/40 hidden sm:block"></div><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button><button aria-label="Telemetry Stream" class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span></button><div class="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant/30"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-on-surface leading-tight">Dr. Marcus Vance, PE</span><span class="font-code-telemetry text-[10px] text-primary uppercase font-medium">Chief Structural Signoff</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<div class="p-space-lg max-w-[1680px] mx-auto w-full space-y-space-lg">
+<!-- Top Telemetry & Banner -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm p-space-lg flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="space-y-space-xs z-10 max-w-2xl">
+<div class="flex items-center gap-space-xs text-primary font-code-telemetry text-label-sm uppercase tracking-wider">
+<span class="inline-flex w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span>NCEES • PE/SE Cryptographic Stamping Protocol 8.4</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Certified Structural Engineering Consultant Network</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Deploy certified forensic structural engineers, seismic risk analysts, and marine civil inspectors directly to your digital twins and photogrammetry logs.</p>
+</div>
+<div class="flex items-center gap-space-md z-10 flex-wrap">
+<div class="flex flex-col bg-surface-container-low px-space-md py-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm uppercase text-outline">Verified Pool</span>
+<span class="font-headline-md text-headline-md text-primary font-bold">142 PEs</span>
+</div>
+<div class="flex flex-col bg-surface-container-low px-space-md py-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm uppercase text-outline">Avg Peer Stamping</span>
+<span class="font-headline-md text-headline-md text-secondary font-bold">3.8 hrs</span>
+</div>
+<div class="flex flex-col bg-surface-container-low px-space-md py-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm uppercase text-outline">Compliance Shield</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">100% E&amp;O</span>
+</div>
+</div>
+<!-- Subtle Ambient Decorative Gradient -->
+<div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-surface-container-highest/60 blur-3xl pointer-events-none"></div>
+</div>
+<!-- Filter & Search Controls Bar -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-sm">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm">
+<!-- Search bar -->
+<div class="md:col-span-5 relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">badge</span>
+<input class="w-full h-11 pl-10 pr-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:shadow-md transition-all" id="consultant-search" placeholder="Search by PE name, NCEES ID, megastructure audit type..." type="text"/>
+</div>
+<!-- Jurisdiction Filter -->
+<div class="md:col-span-4 relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">gavel</span>
+<select class="w-full h-11 pl-10 pr-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none cursor-pointer" id="jurisdiction-filter">
+<option value="all">All Jurisdictions (NCEES Reciprocal)</option>
+<option value="ca">California NCEES / Caltrans Board</option>
+<option value="ny">New York State / NYC DOB Certified</option>
+<option value="tx">Texas Board of Professional Engineers</option>
+<option value="fl">Florida FBPE (Coastal Zone)</option>
+<option value="eurocode">Eurocode EN 1990/1998 Harmonized</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+<!-- Specialization Filter -->
+<div class="md:col-span-3 relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">category</span>
+<select class="w-full h-11 pl-10 pr-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none cursor-pointer" id="specialization-filter">
+<option value="all">All Specializations</option>
+<option value="seismic">Seismic Forensics &amp; Pushover</option>
+<option value="bridge">Bridge Pier &amp; Hydro-Dynamics</option>
+<option value="highrise">High-Rise Wind Loading &amp; Tuned Mass</option>
+<option value="dam">Dam Safety &amp; Geostructural</option>
+<option value="foundation">Deep Foundation &amp; Soil Mechanics</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Quick Toggles -->
+<div class="flex items-center gap-space-xs flex-wrap pt-space-xs font-label-md text-label-md">
+<span class="text-outline uppercase text-[10px] tracking-wider mr-2">Telemetry Tags:</span>
+<button class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">ASCE Fellow (8)</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">ATC-20 Rapid Responder (14)</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">Sonar Photogrammetry (19)</button>
+<button class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">FAA 107 Commercial Drone (32)</button>
+<button class="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-bold">24h Instant Dispatch Available (6)</button>
+</div>
+</div>
+<!-- Main Workspace Split: Grid (Left/Center) + Sticky Proposal Drawer (Right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Consultants Grid (Cols 1-8) -->
+<div class="lg:col-span-8 space-y-space-md">
+<!-- Consultant Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-space-md flex flex-col md:flex-row gap-space-md">
+<div class="flex flex-col items-center md:items-start shrink-0 space-y-space-sm">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait photo of Dr. Marcus Vance, a seasoned civil engineer in his late 40s wearing safety glasses and a crisp technical field vest with subtle blue high-vis accents against a high-tech concrete infrastructure test facility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASW68WvjPmYMTXebb0D4Y8Nwe35TOj4_R7yzbUq6mf8sx6KYSmlr2VLIX3rkuPPDSzTCtCuMOnljEp8YeAD68mU2eVCTfUJMLf-rqf_LCc3UsQilLln9TpowXu7Aaz02LA3YUzTEINhOZYpltQ5erzGaDHVG4CKV6baMg8jTQCtKgJWBAbz3mH0FdHGAf1roE0ac5hbQyF28QCB3oip9Tgc7KucGP-B8Cl03pY70Cq"/>
+<span class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded font-code-telemetry text-[9px] text-primary font-bold">VERIFIED</span>
+</div>
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-md text-headline-md font-bold text-on-surface leading-tight">$240<span class="text-body-sm text-outline font-normal">/hr</span></span>
+<span class="font-code-telemetry text-[11px] text-secondary-container bg-surface-container-low px-2 py-0.5 rounded mt-1 font-semibold">18 Yrs Experience</span>
+</div>
+</div>
+<div class="flex-1 space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
+                  Dr. Marcus Vance, PE, SE
+                  <span class="material-symbols-outlined text-primary text-[18px]" title="Board Certified Structural Engineer">verified</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">Principal Forensic Structural Engineer • Caltrans &amp; NCEES Registered</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-code-telemetry text-code-telemetry text-on-surface font-bold">99.4%</span>
+<span class="text-outline text-body-sm">(142 audits)</span>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex flex-wrap gap-1.5 py-1">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm rounded font-bold">Board Verified SE</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">FAA Part 107 Pilot</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Caltrans Seismic Advisory</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">AASHTO LRFD</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+              Specialized in progressive collapse prevention, deep shear crack mapping using CivilVision photogrammetry models, and accelerated bridge construction forensics. Certified forensic witness.
+            </p>
+<!-- Past Megastructure Audits Mini-List -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between text-body-sm text-on-surface-variant gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">domain_verification</span>
+<span class="font-label-sm text-label-sm text-on-surface">Notable: San Mateo-Hayward Pier Retrofit (2023) • Hoover Bypass Pier 4 Strain</span>
+</div>
+<span class="font-code-telemetry text-[11px] text-primary font-semibold">CA SE #59104</span>
+</div>
+<!-- Actions Row -->
+<div class="flex items-center justify-between pt-space-xs gap-space-sm flex-wrap">
+<button class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm" onclick="openBookingModal('Dr. Marcus Vance, PE, SE', '$240/hr')">
+<span class="material-symbols-outlined text-[17px]">calendar_today</span>
+<span>Book Inspection Consultation</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg transition-colors" onclick="requestDirectQuote('Dr. Marcus Vance, PE, SE')">
+                  Instant PE Quote
+                </button>
+<button class="w-9 h-9 flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-lg transition-colors" title="Review Complete NCEES Audit Log">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Consultant Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-space-md flex flex-col md:flex-row gap-space-md">
+<div class="flex flex-col items-center md:items-start shrink-0 space-y-space-sm">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait photo of engineer Elena Rostova wearing an ultra-clean navy safety jacket and helmet holding a high-precision marine bathymetric tablet at a coastal shipyard dock." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPwoHppx9jsrd-HIqF5TzqL0x_9Tvzr4Rsug2NYgb8BOnp_yFzzEwOg3vimYLgrR4HIY2t1qte1qPCmlcz9iI8qdNaR58bWbkc66d4O_9ytPLXjjIWzpg4-SMjUSAHfiruNyAse92pks8kmzo5HWOoaMg2tA15n7W6lu2TQqqYTtEFgFbUr0KfjnQDaNe0F5w9zAGCiAc312BXbSo_bEtcQ_pO1t_FQF2gxQD2XTxY"/>
+<span class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded font-code-telemetry text-[9px] text-primary font-bold">VERIFIED</span>
+</div>
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-md text-headline-md font-bold text-on-surface leading-tight">$210<span class="text-body-sm text-outline font-normal">/hr</span></span>
+<span class="font-code-telemetry text-[11px] text-secondary-container bg-surface-container-low px-2 py-0.5 rounded mt-1 font-semibold">14 Yrs Experience</span>
+</div>
+</div>
+<div class="flex-1 space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
+                  Elena Rostova, PE
+                  <span class="material-symbols-outlined text-primary text-[18px]" title="Licensed Civil &amp; Marine Engineer">verified</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">Bridge &amp; Marine Infrastructure Specialist • NYC DOT / NYS Licensed</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-code-telemetry text-code-telemetry text-on-surface font-bold">98.9%</span>
+<span class="text-outline text-body-sm">(98 audits)</span>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex flex-wrap gap-1.5 py-1">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm rounded font-bold">NYC DOT Approved</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Underwater Sonar / ROV</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">LiDAR Photogrammetry</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Scour Critical Specialist</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+              Leads offshore caisson inspections, dynamic scour rate evaluations, and salt-water tidal corrosion forensics. Expert in fusing bathymetric multibeam sonar with CivilVision 3D point-clouds.
+            </p>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between text-body-sm text-on-surface-variant gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">waves</span>
+<span class="font-label-sm text-label-sm text-on-surface">Notable: Verrazzano Narrows Anchorage Scour • Brooklyn Navy Yard Pier 6</span>
+</div>
+<span class="font-code-telemetry text-[11px] text-primary font-semibold">NY PE #088219</span>
+</div>
+<div class="flex items-center justify-between pt-space-xs gap-space-sm flex-wrap">
+<button class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm" onclick="openBookingModal('Elena Rostova, PE', '$210/hr')">
+<span class="material-symbols-outlined text-[17px]">calendar_today</span>
+<span>Book Inspection Consultation</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg transition-colors" onclick="requestDirectQuote('Elena Rostova, PE')">
+                  Instant PE Quote
+                </button>
+<button class="w-9 h-9 flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Consultant Card 3 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-space-md flex flex-col md:flex-row gap-space-md">
+<div class="flex flex-col items-center md:items-start shrink-0 space-y-space-sm">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait photo of Dr. David K. Chen, distinguished Asian structural engineering researcher and practitioner with silver hair, professional dark turtleneck under an architectural suit jacket." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgtimCuD6G-TOukLFtW5w3HUhGtaTriBKuVgWfP27ghz0TOqYV0R_WWY-2fxB4p7_ksqodOEl5b7oQVLrSNSAiLZv60t6RDiBcACH2RhYdO6ZvrgXy6DQ4gpv9uUFS010tzhK-vzd4HCQh8kwk9c6yMoNmfuP9p54FKBy-KPg9A9Tlht0f58JM7J6pqgpPbhaJ6Q1aDWtNV0a0exffCoaBLxgi7WlFvnS324u7twO4"/>
+<span class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded font-code-telemetry text-[9px] text-primary font-bold">VERIFIED</span>
+</div>
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-md text-headline-md font-bold text-on-surface leading-tight">$285<span class="text-body-sm text-outline font-normal">/hr</span></span>
+<span class="font-code-telemetry text-[11px] text-secondary-container bg-surface-container-low px-2 py-0.5 rounded mt-1 font-semibold">22 Yrs Experience</span>
+</div>
+</div>
+<div class="flex-1 space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
+                  David K. Chen, PhD, PE
+                  <span class="material-symbols-outlined text-primary text-[18px]" title="Elected ASCE Fellow">verified</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">High-Rise Foundation &amp; Concrete Diagnostics • ASCE Fellow</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-code-telemetry text-code-telemetry text-on-surface font-bold">99.8%</span>
+<span class="text-outline text-body-sm">(210 audits)</span>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex flex-wrap gap-1.5 py-1">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm rounded font-bold">ASCE Fellow</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">High-Rise Wind Tunnel</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Post-Tensioned Slabs</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Concrete Core Petrology</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+              Authority on differential settlement, supertall aerodynamic mitigation, and alkali-silica reactivity (ASR). Author of 34 ASCE papers on high-performance reinforced self-healing concretes.
+            </p>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between text-body-sm text-on-surface-variant gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">apartment</span>
+<span class="font-label-sm text-label-sm text-on-surface">Notable: Chicago Supertall Mat Foundation Review • Miami Coastal Tower Deep Piles</span>
+</div>
+<span class="font-code-telemetry text-[11px] text-primary font-semibold">IL &amp; FL PE #71290</span>
+</div>
+<div class="flex items-center justify-between pt-space-xs gap-space-sm flex-wrap">
+<button class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm" onclick="openBookingModal('David K. Chen, PhD, PE', '$285/hr')">
+<span class="material-symbols-outlined text-[17px]">calendar_today</span>
+<span>Book Inspection Consultation</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg transition-colors" onclick="requestDirectQuote('David K. Chen, PhD, PE')">
+                  Instant PE Quote
+                </button>
+<button class="w-9 h-9 flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Consultant Card 4 -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-space-md flex flex-col md:flex-row gap-space-md">
+<div class="flex flex-col items-center md:items-start shrink-0 space-y-space-sm">
+<div class="relative w-28 h-28 rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait photo of structural engineer Sarah Jenkins on-site with an inspection clipboard and rugged mobile device, wearing a high-vis jacket against a modern seismic retrofitted overpass." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg4irV0sNLgE98SK7MqDXH_ZD8xsMEi855lNSz7MRg9wYnPMhCur2PLjtFxEFHPbDF0LfvvoI7FQTI9rXI58ZGQ9ALXCQGJmGLMVuP2ovhucGjUWabvCCdjxCFiB9Zm7u8iiL0iA3kUhzQyuPQTZxGQ3RZXPj7oBXbh2q5DST4ol8saJ46dgYTp5riwT0jS4iz9XPfJIlixcJDvGpXWghEUoX-zrBZTIUvbgwSdV2n"/>
+<span class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded font-code-telemetry text-[9px] text-primary font-bold">VERIFIED</span>
+</div>
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-md text-headline-md font-bold text-on-surface leading-tight">$195<span class="text-body-sm text-outline font-normal">/hr</span></span>
+<span class="font-code-telemetry text-[11px] text-secondary-container bg-surface-container-low px-2 py-0.5 rounded mt-1 font-semibold">11 Yrs Experience</span>
+</div>
+</div>
+<div class="flex-1 space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-1.5">
+                  Sarah Jenkins, PE
+                  <span class="material-symbols-outlined text-primary text-[18px]" title="ATC-20 Certified Specialist">verified</span>
+</h3>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium">Rapid Seismic Assessment &amp; Post-Disaster Stamping • ATC-20 Certified</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-code-telemetry text-code-telemetry text-on-surface font-bold">99.1%</span>
+<span class="text-outline text-body-sm">(164 audits)</span>
+</div>
+</div>
+<!-- Badges -->
+<div class="flex flex-wrap gap-1.5 py-1">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm rounded font-bold">ATC-20 Certified</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">FEMA P-154 Screener</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">24h Rapid Red-Tag Clear</span>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded">Tilt-Up Concrete Retrofits</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+              Emergency structural triage coordinator. Deploys instantaneous red/yellow/green tagging verification within 24 hours of seismic disturbances using drone orthomosaics and accelerometers.
+            </p>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between text-body-sm text-on-surface-variant gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">warning</span>
+<span class="font-label-sm text-label-sm text-on-surface">Notable: Ridgecrest M7.1 Industrial Triage • Anchorage Port Viaduct Clearance</span>
+</div>
+<span class="font-code-telemetry text-[11px] text-primary font-semibold">CA &amp; AK PE #94821</span>
+</div>
+<div class="flex items-center justify-between pt-space-xs gap-space-sm flex-wrap">
+<button class="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm" onclick="openBookingModal('Sarah Jenkins, PE', '$195/hr')">
+<span class="material-symbols-outlined text-[17px]">calendar_today</span>
+<span>Book Inspection Consultation</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg transition-colors" onclick="requestDirectQuote('Sarah Jenkins, PE')">
+                  Instant PE Quote
+                </button>
+<button class="w-9 h-9 flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-on-surface-variant rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</div>
+<!-- Right-hand Sticky Side Widget: Request Custom PE Stamped Proposal (Cols 9-12) -->
+<aside class="lg:col-span-4 sticky top-20 space-y-space-md">
+<!-- Main Request Box -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border-t-4 border-primary space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]">verified_user</span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">PE Stamped Proposal</h2>
+</div>
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed font-code-telemetry text-[10px] font-bold rounded">LEGAL SIGN-OFF</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Generate an official, binding engineering review scope for municipal DOT submittals, insurance audits, or building department compliance.
+          </p>
+<form class="space-y-space-sm" id="proposal-form" onsubmit="handleProposalSubmit(event)">
+<!-- Asset Selection -->
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Target Infrastructure Asset</label>
+<select class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none">
+<option value="current">Current Active Session: VA-GIGASTORE-01 (Shear Beam 4)</option>
+<option value="bridge">Interstate 80 Overpass (Pier #3 Substructure)</option>
+<option value="dam">Calaveras Spillway (Photogrammetry Mesh #12)</option>
+<option value="upload">Upload New IFC / Revit / Point Cloud BIM...</option>
+</select>
+</div>
+<!-- Stamping Jurisdiction -->
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Required Legal Jurisdiction</label>
+<div class="relative">
+<select class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none appearance-none">
+<option>California (Caltrans • OSHPD • Seismic SE)</option>
+<option>New York (NYC DOB • NYSDOT)</option>
+<option>Texas (TxDOT Critical Asset Review)</option>
+<option>Federal Highway Administration (FHWA LRFD)</option>
+<option>Eurocode 8 (Seismic Evaluation)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Turnaround speed toggle -->
+<div class="pt-1">
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1.5">Dispatch Velocity</label>
+<div class="grid grid-cols-2 gap-space-xs">
+<label class="flex flex-col p-space-sm rounded-lg bg-surface-container cursor-pointer has-[:checked]:bg-primary-fixed has-[:checked]:text-on-primary-fixed transition-colors">
+<input checked="" class="sr-only" name="velocity" type="radio" value="standard"/>
+<span class="font-label-md text-label-md font-bold">Standard Review</span>
+<span class="text-body-sm text-[11px] opacity-80">3-5 Business Days</span>
+</label>
+<label class="flex flex-col p-space-sm rounded-lg bg-surface-container cursor-pointer has-[:checked]:bg-secondary-container has-[:checked]:text-on-secondary-container transition-colors">
+<input class="sr-only" name="velocity" type="radio" value="expedited"/>
+<div class="flex items-center gap-1 font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span>24h Expedited</span>
+</div>
+<span class="text-body-sm text-[11px] opacity-80">Immediate Drone Triage</span>
+</label>
+</div>
+</div>
+<!-- Notes -->
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Audit Focus &amp; Notes</label>
+<textarea class="w-full p-2.5 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none placeholder:text-outline resize-none" placeholder="Specify known crack width (e.g. 0.42mm), strain gauge anomalies, or urgent city violation notices..." rows="3"></textarea>
+</div>
+<!-- Cost Summary Box -->
+<div class="bg-surface-container p-space-sm rounded-lg space-y-1">
+<div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Estimated PE Time</span>
+<span class="font-code-telemetry">6 - 8 Engineering Hours</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Digital Twin Ingestion</span>
+<span class="text-primary font-semibold">Included</span>
+</div>
+<div class="flex justify-between font-label-md text-label-md text-on-surface font-bold pt-1 border-t border-outline-variant/30">
+<span>Estimated Total</span>
+<span class="font-code-telemetry text-headline-sm">$1,440 - $1,920</span>
+</div>
+</div>
+<!-- Submit CTA -->
+<button class="w-full py-3 bg-secondary text-on-secondary rounded-lg font-label-md text-label-md font-bold hover:bg-secondary-container transition-colors flex items-center justify-center gap-2 shadow-sm" type="submit">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Dispatch Stamped Proposal Request</span>
+</button>
+</form>
+<div class="flex items-center justify-center gap-2 text-outline font-label-sm text-[11px] text-center">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>All submittals covered by $10M Professional Errors &amp; Omissions</span>
+</div>
+</div>
+<!-- Telemetry Widget: Real-time Review Queue Activity -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Network Live Activity</span>
+<span class="flex items-center gap-1 font-code-telemetry text-[11px] text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>ACTIVE
+            </span>
+</div>
+<div class="space-y-space-xs font-body-sm text-[12px]">
+<div class="p-2 rounded bg-surface-container-low flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary mt-0.5">draw</span>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Digital Stamp Issued: NY Pier 88</span>
+<span class="text-on-surface-variant text-[11px]">By Elena Rostova, PE • 14 mins ago</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">assignment_turned_in</span>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Seismic Review Clear: Bay Bridge Span</span>
+<span class="text-on-surface-variant text-[11px]">By Dr. Marcus Vance, PE • 42 mins ago</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<!-- Interactive Booking Consultation Modal (Hidden by Default) -->
+<div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-space-md" id="booking-modal">
+<div class="bg-surface-container-lowest max-w-lg w-full rounded-xl shadow-2xl p-space-lg space-y-space-md animate-in fade-in zoom-in-95 duration-150">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-code-telemetry text-[11px] text-primary font-bold uppercase">Schedule Peer Tele-Inspection</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modal-consultant-name">Consultation Booking</h3>
+<span class="font-code-telemetry text-body-sm text-outline" id="modal-consultant-rate">$240/hr</span>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant" onclick="closeBookingModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="space-y-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Select Consultation Date</label>
+<input class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none" type="date" value="2025-03-20"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Available 45-Min Slots</label>
+<div class="grid grid-cols-3 gap-2 font-code-telemetry text-body-sm">
+<button class="py-2 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-medium transition-colors">09:00 EST</button>
+<button class="py-2 rounded bg-primary text-on-primary font-medium">11:30 EST</button>
+<button class="py-2 rounded bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-medium transition-colors">14:15 EST</button>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Linked CivilVision 3D Model</label>
+<input class="w-full h-10 px-3 bg-surface-container rounded-lg font-code-telemetry text-body-sm text-on-surface-variant" readonly="" type="text" value="GIGASTORE-01 // Orthomosaic Slice #449"/>
+</div>
+</div>
+<div class="pt-space-xs flex items-center justify-end gap-space-sm">
+<button class="px-4 py-2 bg-surface-container rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors" onclick="closeBookingModal()">Cancel</button>
+<button class="px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md font-bold hover:bg-primary-container transition-colors shadow-sm" onclick="confirmBooking()">Confirm Session</button>
+</div>
+</div>
+</div>
+<!-- Notification Toast -->
+<div class="fixed bottom-6 right-6 bg-surface-container-lowest text-on-surface px-space-md py-space-sm rounded-xl shadow-xl flex items-center gap-space-sm z-50 transform translate-y-32 opacity-0 transition-all duration-200" id="toast-notification">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-message">Proposal request queued for expedited review.</span>
+</div>
+</div>
+<script>
+  function openBookingModal(name, rate) {
+    document.getElementById('modal-consultant-name').textContent = name;
+    document.getElementById('modal-consultant-rate').textContent = 'Rate: ' + rate + ' &bull; Direct Video Link with CAD Screen-Share';
+    document.getElementById('booking-modal').classList.remove('hidden');
+  }
+
+  function closeBookingModal() {
+    document.getElementById('booking-modal').classList.add('hidden');
+  }
+
+  function confirmBooking() {
+    closeBookingModal();
+    showToast('Consultation verified! Calendar invite sent with CivilVision live viewer access.');
+  }
+
+  function requestDirectQuote(name) {
+    showToast('Quote package requested from ' + name + '. Expected delivery: <2 hours.');
+  }
+
+  function handleProposalSubmit(e) {
+    e.preventDefault();
+    showToast('PE proposal generated! A licensed principal has been notified.');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast-notification');
+    const label = document.getElementById('toast-message');
+    label.textContent = msg;
+    toast.classList.remove('translate-y-32', 'opacity-0');
+    setTimeout(() => {
+      toast.classList.add('translate-y-32', 'opacity-0');
+    }, 3800);
+  }
+
+  // Client-side quick filter logic
+  document.getElementById('consultant-search').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('article');
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? '' : 'none';
+    });
+  });
+</script></main></div></body></html>

@@ -1,0 +1,153 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{parskip}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{textcomp}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{document}
+
+% ================= TRANG BIA =================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\large \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH}\par}
+    {\large \textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN}\par}
+    \vspace{1.5cm}
+    \includegraphics[width=4cm]{logo.png}\par
+    \vspace{1.5cm}
+    {\LARGE \textbf{BÁO CÁO TIẾN ĐỘ}\par}
+    {\LARGE \textbf{KHÓA LUẬN TỐT NGHIỆP}\par}
+    \vspace{0.15cm}
+    {\large \textbf{(Lần 12)}\par}
+    \vspace{1.3cm}
+    {\Large \textbf{PHÁT HIỆN VÀ PHÂN LOẠI VẾT NỨT BỀ MẶT CÔNG TRÌNH XÂY DỰNG TỪ ẢNH HAI CHIỀU SỬ DỤNG MÔ HÌNH HỌC SÂU}\par}
+    \vspace{0.4cm}
+    {\large \textit{Detection and Classification of Surface Cracks on Civil Infrastructure from Two-Dimensional Images Using Deep Learning Models}\par}
+    \vspace{2.2cm}
+    \begin{flushright}
+        \textbf{GVHD:} TS. Phan Xuân Thiện\\[0.4cm]
+        \textbf{Sinh viên thực hiện:}\\
+        Ngô Kim Thành -- 23521447\\
+        Trần Công Thành -- 23521463
+    \end{flushright}
+    \vfill
+    {\large TP. Hồ Chí Minh, ngày 27 tháng 10 năm 2026\par}
+\end{titlepage}
+
+% ================= NOI DUNG =================
+\section{Mục tiêu và những việc đã triển khai trong tuần}
+Bám theo kế hoạch của báo cáo lần 11 (gộp ảnh negative vào tập huấn luyện chính, huấn luyện đối chứng, và phác thảo schema nhãn Phase~2 theo ACI~224R / TCVN~9381:2012), trong tuần qua nhóm đã hoàn toàn tất cả ba hạng mục và mở rộng thêm:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Gộp bổ sung 3.000 ảnh negative} (METU Negative, SDNET2018 UD/UW -- tường và sàn cầu không nứt, nhãn rỗng) vào tập train chính; tổng số ảnh nền trong train đạt \textbf{4.048 ảnh}, kèm rà soát và bổ sung 118 nhãn thiếu (pseudo-GT, conf $\geq$ 0.6) cho hai nguồn Rissbilder và Volker.
+    \item \textbf{Huấn luyện đối chứng cấu hình B} (YOLOv8s-seg, \texttt{imgsz=1280}, multi-scale) trên Kaggle T4$\times$2 và \textbf{đánh giá định lượng đầy đủ} so với cấu hình A (640px): sweep ngưỡng tin cậy, tỉ lệ báo giả trên ảnh nền, và so sánh chuẩn mức pixel với bài báo SOTA (arXiv:2508.10256).
+    \item \textbf{Tách bộ hard-case vân đá} (303 ảnh: 118 forest + 185 Sylvie, 509 vết nứt đá thật có nhãn) khỏi mọi tập huấn luyện và \textbf{đo độ nhầm lẫn} (false positive) của cả hai cấu hình.
+    \item \textbf{Hoàn thiện Phase~2 end-to-end}: thang mức độ nghiêm trọng 4 mức theo ACI~224R-01/TCVN~9381:2012, module đo đặc trưng vết nứt đã \textbf{kiểm chứng sai số} (bề rộng $\leq$ 1px), quy tắc \textbf{đa yếu tố} (bề rộng -- chiều dài -- độ đậm -- ngữ cảnh), tích hợp vào hệ thống kiểm định.
+    \item \textbf{Xây dựng hệ thống kiểm định hoàn chỉnh} (API + giao diện 6 phân hệ, luồng hồ sơ chờ duyệt/phê duyệt, báo cáo in PDF) kèm hạ tầng DevOps (Docker, CI/CD) và bộ kiểm thử tự động 28 unit test + 7 bước end-to-end.
+\end{itemize}
+
+\section{Thực nghiệm đối chứng: cấu hình A (640px) vs cấu hình B (1280px)}
+Cấu hình B được huấn luyện với dữ liệu đã cải thiện (thêm 3.000 ảnh nền, bổ sung nhãn thiếu) ở độ phân giải 1280px, dừng sớm tại epoch $\sim$74. Đánh giá trên tập kiểm thử độc lập gồm \textbf{1.491 ảnh / 3.531 vết nứt} (IoU $\geq$ 0.5), sweep ngưỡng tin cậy để tìm điểm vận hành tốt nhất của từng cấu hình:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Cấu hình} & \textbf{conf} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{FP trên ảnh nền} \\
+\midrule
+A -- YOLOv8s-seg 640px & 0.25 & \textbf{0.797} & \textbf{0.555} & \textbf{0.655} & 2.2\% (9/400) \\
+B -- 1280px, conf 0.25 & 0.25 & 0.516 & 0.511 & 0.513 & \textbf{1.5\%} (6/400) \\
+B -- 1280px, conf 0.35 & 0.35 & 0.554 & 0.478 & 0.514 & -- \\
+B -- 1280px, conf 0.45 & 0.45 & 0.608 & 0.445 & 0.514 & -- \\
+B -- 1280px, conf 0.55 & 0.55 & 0.683 & 0.378 & 0.487 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Phân tích và quyết định:}
+\begin{itemize}[leftmargin=*]
+    \item Cấu hình B giảm rõ rệt báo giả trên ảnh nền (1.5\% so với 2.2\%) và nhỉnh hơn ở mức pixel trên bộ 3DCrack (Dice 0.718 so với 0.708), nhưng \textbf{F1 instance tối đa chỉ đạt 0.514}, thua cấu hình A (0.655) trên toàn dải ngưỡng. Nguyên nhân: ở 1280px mô hình sinh nhiều khung mảnh chất lượng thấp, và khung mảnh cực nhạy với ngưỡng khớp IoU 0.5 (lệch vài pixel làm mất khớp); ngoài ra checkpoint tải về là bản \texttt{last} của lượt resume (epoch $\sim$74) chứ không phải \texttt{best} thực sự.
+    \item \textbf{Quyết định: giữ cấu hình A (640px) làm mô hình chính} của hệ thống; checkpoint B lưu làm tham chiếu. Bài học cho vòng v3: huấn luyện tiếp tục từ trọng số A, độ phân giải trung gian 960px, tải đúng \texttt{best.pt}, và cân nhắc gộp khung (WBF) cho vết mảnh.
+    \item Điểm yếu chung được đo đạc rõ: \textbf{75.5\%} vết bị bỏ sót của cấu hình A là vết nhỏ (cạnh $<$ 32px) -- đây chính là nhóm vết siêu mảnh mà hướng tiền xử lý tăng tương phản của lần 11 nhắm tới.
+\end{itemize}
+
+\section{So sánh với SOTA (arXiv:2508.10256, Georgia Tech 2025)}
+Nhóm tự cài đặt bộ đo mức pixel (IoU/Precision/Recall/Dice) đúng như bài báo tổng quan tốt nhất hiện nay, đánh giá trên đúng hai bộ dữ liệu chung:
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Bộ dữ liệu} & \textbf{Mô hình nhóm (Dice)} & \textbf{ResUNet (bài báo)} & \textbf{Khoảng cách} \\
+\midrule
+DeepCrack & 0.819 & 0.833 & $-$1.4\% (gần bằng) \\
+3DCrack & 0.708 & 0.795 & $-$11\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+Trên DeepCrack, mô hình của nhóm \textbf{tiếp cận ngang baseline ResUNet} của bài báo dù huấn luyện đa nguồn và chia tập khác; khoảng cách chính nằm ở 3DCrack (vết mảnh 1--2px, ảnh 512$\times$624) -- nhất quán với điểm yếu vết nhỏ nêu trên.
+
+\section{Hard-case vân đá: đo độ nhầm lẫn}
+Nhóm tách 303 ảnh vân đá/nứt đá (forest 118, Sylvie 185; 509 vết có nhãn ground truth) thành tập chuyên đo báo giả -- bộ này \textbf{không xuất hiện} trong bất kỳ tập huấn luyện nào:
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{4}{c}{\textbf{Số vết báo giả (FP) tại ngưỡng conf}} & \textbf{F1 trên đá} \\
+\textbf{Mô hình} & 0.25 & 0.35 & 0.45 & 0.55 & (best conf) \\
+\midrule
+A -- 640px & 107 & 89 & 74 & \textbf{65} & 0.513 (P 0.731 / R 0.395) \\
+B -- 1280px & 350 & 235 & 128 & 53 & 0.397 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Tỉ lệ ảnh vân đá bị báo nhầm ít nhất một vết (FP image rate) theo ngưỡng conf: mô hình A đạt \textbf{30.7\% → 24.1\% → 21.5\%} tại conf 0.25/0.45/0.55; mô hình B đạt 72.3\% → 36.3\% → 17.2\%. Phân tách theo nguồn (mô hình A): Sylvie đạt khá (P 0.843 / R 0.566 / F1 0.677), forest khó hơn (P 0.590 / R 0.256 / F1 0.357, pixel Dice 0.190 do vân đá dày đặc).
+\textbf{Nhận xét:} ở ngưỡng vận hành thực tế (conf $\geq$ 0.45--0.55), mô hình A chỉ báo nhầm vân đá thành vết nứt \textbf{74--65 lần trên 303 ảnh} ($\approx$ 0.2--0.24 lần/ảnh) và vẫn bắt được $\sim$40\% vết nứt trên vật liệu hoàn toàn lạ (chưa từng học); mô hình B báo giả nhiều hơn hẳn ở ngưỡng thấp nhưng giảm sâu ở ngưỡng cao. Hướng xử lý tuần tới: gộp một phần vân đá làm hard negative (nhãn rỗng) như kế hoạch lần 11 và đo lại.
+
+\section{Phase 2 hoàn thiện: đo lường đã kiểm chứng + phân loại đa yếu tố}
+\textbf{(1) Module đo đặc trưng vết nứt (Lớp A) với kiểm chứng sai số:} bề rộng lớn nhất (distance-transform chính xác, hiệu chỉnh nửa pixel), chiều dài, góc trục chính (moments), độ phân nhánh (skeleton hóa Zhang--Suen), diện tích, mật độ. Kiểm chứng trên mask tổng hợp kích thước đã biết: \textbf{bề rộng lệch tối đa 1px, chiều dài 0px, góc 0$^\circ$, phát hiện nhánh đúng} -- đạt giới hạn lượng tử hóa pixel.
+
+\textbf{(2) Thang 4 mức theo ACI 224R-01 / TCVN 9381:2012:} L0 Hairline ($<$0.1mm), L1 Minor (0.1--0.3mm), L2 Moderate (0.3--1.0mm), L3 Severe ($\geq$1.0mm); bề rộng quy đổi mm = bề rộng lớn nhất $\times$ GSD (thang đo mm/pixel hiệu chuẩn ngay trên ảnh bằng công cụ đo 2 điểm vào vật chuẩn).
+
+\textbf{(3) Phân loại đa yếu tố -- giải quyết trường hợp ``vết dài nhưng mảnh'':} bề rộng một mình không đủ đánh giáseverity, nhóm bổ sung các yếu tố (mỗi yếu tố +1 mức, cộng tối đa +2, chặn tại L3, \textbf{hiển thị đầy đủ lý do}):
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Chiều dài} $\geq$ 300mm: hư hỏng lan rộng;
+    \item \textbf{Độ đậm (contrast)} $\geq$ 30\% tối hơn nền cục bộ: proxy cho \textbf{độ sâu} vết nứt (vết sâu hiện đậm rõ, vết cạn/hairline thường mờ);
+    \item \textbf{Ngữ cảnh (Lớp B)}: mạng lưới rẽ nhánh / đa mặt phẳng;
+    \item \textbf{Nứt xuyên cấu kiện} (kỹ sư đánh dấu): cưỡng chế L3.
+\end{itemize}
+Ví dụ đã kiểm thử: vết mảnh 0.15mm, dài 750mm, đậm 50\% được nâng từ L1 lên \textbf{L3} (bề rộng đơn thuần sẽ bỏ sót); cùng vết đó nếu nhạt chỉ lên L2 -- phân biệt được đậm/nhạt theo yêu cầu thực tế.
+
+\section{Hệ thống kiểm định tích hợp hai Phase}
+Xây dựng hoàn chỉnh sản phẩm demo theo quy trình công ty: giao diện 6 phân hệ (Dashboard, Phiếu kiểm tra 4 bước, Hồ sơ kèm phê duyệt, Phase~2, Model benchmark, Thiết lập); API FastAPI (phát hiện + đo đặc trưng + phân loại lại không cần suy luận lại); SQLite lưu trữ hồ sơ; báo cáo kiểm định in PDF có ô chữ ký; hiệu chuẩn GSD trên ảnh; Docker + CI/CD GitHub Actions. Bộ kiểm thử: \textbf{28/28 unit test} và \textbf{7/7 bước end-to-end} pass.
+
+\section{Công việc đã làm và kế hoạch tuần tới}
+\textbf{Đã làm:}
+\begin{itemize}[leftmargin=*]
+    \item Gộp 3.000 ảnh negative vào train (tổng nền 4.048 ảnh), audit và bổ sung 118 nhãn thiếu; đóng gói dữ liệu v2 lên Kaggle.
+    \item Huấn luyện và đánh giá đối chứng A/B đầy đủ (sweep conf, FP ảnh nền, Dice mức pixel so SOTA); quyết định giữ A, trích xuất bài học cho v3.
+    \item Tách bộ hard-case vân đá 303 ảnh và đo độ nhầm lẫn của cả hai mô hình.
+    \item Hoàn thiện Phase~2: thang ACI/TCVN, đo lường kiểm chứng $\pm$1px, phân loại đa yếu tố (thêm độ đậm, chiều dài), tích hợp app + hiệu chuẩn GSD + tái phân loại hồ sơ đã lưu.
+    \item Xây dựng hệ thống kiểm định 6 phân hệ + DevOps + 28 unit test + 7 bước E2E.
+\end{itemize}
+\textbf{Tuần tới:}
+\begin{enumerate}[leftmargin=*]
+    \item Gộp \emph{train-negative vân đá} (nhãn rỗng) vào tập train chính, huấn luyện \textbf{v3} từ trọng số A ở 960px, tải đúng \texttt{best.pt}; đo lại FP trên hard-case và F1 trên tập test.
+    \item Nghiệm thu thang 4 mức và ngưỡng đa yếu tố (300mm / 30\%) trên ảnh thực có thước tham chiếu.
+    \item Hoàn thiện Lớp B đúng nghĩa (phân đoạn mặt phẳng cấu kiện) và chuẩn bị số liệu chương thí nghiệm cho báo cáo khóa luận.
+\end{enumerate}
+
+\section{Kết luận}
+Tuần qua nhóm đã hoàn tất trọn vẹn ba hạng mục cam kết: (1) ảnh nền đã được gộp và kiểm soát trong tập huấn luyện chính, đo được tỉ lệ báo giả 1.5--2.2\%; (2) thực nghiệm đối chứng 640px/1280px được thực hiện nghiêm túc với số liệu đầy đủ, từ đó rút ra quyết định kỹ thuật có căn cứ và bài học cho vòng huấn luyện tiếp theo; (3) Phase~2 không chỉ dừng ở schema mà đã \textbf{hoàn thiện end-to-end với đo lường được kiểm chứng ở sai số 1px} và phân loại đa yếu tố giải quyết đúng trường hợp vết dài-mảnh, vết đậm-nhạt mà thực tế kiểm định đòi hỏi. Hệ thống kiểm định hai phase hoàn chỉnh cùng bộ kiểm thử tự động là nền tảng để nhóm tập trung hoàn thiện mô hình v3 và nghiệm thu đề tài.
+
+\end{document}

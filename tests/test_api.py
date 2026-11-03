@@ -36,7 +36,14 @@ def test_meta_and_index():
     assert client.get("/api/meta").status_code == 200
     r = client.get("/")
     assert r.status_code == 200
-    assert "Crack Severity AI" in r.text
+    assert "INFRA" in r.text and "GUARD" in r.text  # gateway template gốc
+
+
+def test_registry_verbatim_template():
+    r = client.get("/registry")
+    assert r.status_code == 200
+    assert "Infrastructure Asset Registry" in r.text
+    assert "/static/infra/wire.js" in r.text  # data-wiring được gắn
 
 
 @pytest.mark.skipif(not WEIGHT_EXISTS, reason="chưa có weights/phase1/best.pt")

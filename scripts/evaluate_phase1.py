@@ -15,6 +15,7 @@ Chạy từ thư mục gốc:  python scripts/evaluate_phase1.py
 
 from __future__ import annotations
 
+import argparse
 import csv
 from collections import defaultdict
 from datetime import datetime
@@ -37,6 +38,8 @@ TARGET_ACC = 0.95
 OUT_DIR = Path("outputs/reports")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 STAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+CONF_SWEEP = (0.25, 0.35, 0.45, 0.55, 0.65)
+sweep_agg: dict[float, np.ndarray] = {t: np.zeros(3, dtype=np.int64) for t in CONF_SWEEP}
 
 # Tiền tố dataset trong tên file primary (do build_clean_phase1.py đặt)
 DATASET_PREFIXES = [
@@ -102,6 +105,14 @@ def prf(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
 
 
 def main() -> None:
+    global WEIGHTS, CONF, IMGSZ
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--weights", default=str(WEIGHTS))
+    ap.add_argument("--conf", type=float, default=CONF)
+    ap.add_argument("--imgsz", type=int, default=IMGSZ)
+    args = ap.parse_args()
+    WEIGHTS, CONF, IMGSZ = Path(args.weights), args.conf, args.imgsz
+
     print("=" * 70)
     print(f"CHẨN ĐOÁN PHASE 1 — weights={WEIGHTS} | split={SPLIT}")
     print(f"conf={CONF} | IoU khớp={IOU_MATCH} | imgsz={IMGSZ}")
@@ -132,10 +143,10 @@ def main() -> None:
         pred_boxes = res.boxes.xyxy.cpu().numpy() if len(res.boxes) else np.zeros((0, 4))
         pred_confs = res.boxes.conf.cpu().numpy() if len(res.boxes) else np.zeros(0)
 
-        # khớp tham lam theo conf giảm dần
+        # khớp tham lam theo conf giảm dần, lưu (conf, khớp?) để quét ngưỡng post-hoc
         order = np.argsort(-pred_confs)
         matched_gt: set[int] = set()
-        tp = fp = 0
+        pred_list: list[tuple[float, bool]] = []  # (conf, is_TP)
         for i in order:
             box = pred_boxes[i]
             best_j, best_iou = -1, IOU_MATCH
@@ -147,10 +158,19 @@ def main() -> None:
                     best_iou, best_j = v, j
             if best_j >= 0:
                 matched_gt.add(best_j)
-                tp += 1
+                pred_list.append((float(pred_confs[i]), True))
             else:
-                fp += 1
+                pred_list.append((float(pred_confs[i]), False))
+        tp = sum(1 for _, ok in pred_list if ok)
+        fp = len(pred_list) - tp
         fn = len(gt_boxes) - len(matched_gt)
+
+        # sweep ngưỡng conf post-hoc (chính xác: greedy ưu tiên conf cao trước)
+        for t in CONF_SWEEP:
+            t_tp = sum(1 for c, ok in pred_list if ok and c >= t)
+            t_fp = sum(1 for c, ok in pred_list if not ok and c >= t)
+            t_fn = max(0, len(gt_boxes) - t_tp)
+            sweep_agg[t] += np.array([t_tp, t_fp, t_fn], dtype=np.int64)
 
         a = agg[src]
         a["img"] += 1
@@ -178,6 +198,9 @@ def main() -> None:
         })
 
     # ---------- tổng hợp ----------
+    if len(rows_csv) < len(images) * 0.99:
+        print(f"⚠️ CẢNH BÁO: chỉ xử lý {len(rows_csv)}/{len(images)} ảnh — "
+              "cv2.imread lỗi hàng loạt, kết quả KHÔNG đáng tin!")
     total = defaultdict(float)
     for a in agg.values():
         for k in ("img", "gt", "pred", "tp", "fp", "fn", "img_ok", "fn_small",
@@ -224,12 +247,31 @@ def main() -> None:
         share_small = total["fn_small"] / fn_tot
         lines += [
             (f"- Tổng FN: {fn_tot}; vết nhỏ (cạnh < {SMALL_PX}px): "
-            f"**{total['fn_small']} ({100 * share_small:.1f}%)**"),
+             f"**{total['fn_small']} ({100 * share_small:.1f}%)**"),
             (f"- Diện tích GT trung bình: FN={total['fn_area'] / fn_tot:.0f}px², "
-            f"TP={total['tp_area'] / max(1, total['tp']):.0f}px²"),
+             f"TP={total['tp_area'] / max(1, total['tp']):.0f}px²"),
         ]
     else:
         lines.append("- Không có FN.")
+
+    # sweep ngưỡng conf
+    lines += [
+        "",
+        f"## 3b. Sweep ngưỡng conf (toàn test, IoU>={IOU_MATCH}) — tìm điểm vận hành",
+        "| conf ≥ | TP | FP | FN | Precision | Recall | F1 |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    best_t, best_f1 = None, -1.0
+    for t in CONF_SWEEP:
+        t_tp, t_fp, t_fn = (int(x) for x in sweep_agg[t])
+        p, r, f = prf(t_tp, t_fp, t_fn)
+        if f > best_f1:
+            best_f1, best_t = f, t
+        lines.append(f"| {t} | {t_tp} | {t_fp} | {t_fn} | {p:.3f} | {r:.3f} | {f:.3f} |")
+    lines.append(
+        f"\n→ **F1 tốt nhất tại conf ≥ {best_t} (F1={best_f1:.3f})**"
+        " — khuyến nghị dùng làm ngưỡng vận hành."
+    )
 
     # ---------- khuyến nghị ----------
     recs: list[str] = []

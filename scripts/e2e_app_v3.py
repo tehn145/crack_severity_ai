@@ -76,11 +76,52 @@ def main() -> None:
     )
     print("3) approve OK:", ap["status"], "| by:", ap["approved_by"])
 
+    # 4.5) /api/severity — phân loại lại không cần model (thêm cờ xuyên cấu kiện)
+    boundary = uuid.uuid4().hex
+    parts = []
+    for k, v in {
+        "detections_json": json.dumps(pred["detections"]),
+        "gsd_mm_per_px": "0.5",
+        "through_flags": json.dumps([True] + [False] * (len(pred["detections"]) - 1)),
+    }.items():
+        parts.append(
+            f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode()
+        )
+    parts.append(f"--{boundary}--\r\n".encode())
+    req = Request(
+        f"{BASE}/api/severity",
+        data=b"".join(parts),
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    sev = json.load(urlopen(req))
+    l0 = sev["detections"][0]["severity"]
+    assert l0 and l0["level"] == 3 and l0["through_member"] is True, "xuyên cấu kiện phải L3"
+    assert sev["severity_summary"], "phải có summary"
+    print("4.5) severity OK:", sev["severity_summary"], "| vết 1 (xuyên): L3 ✓")
+
     # 4) báo cáo có trạng thái + chữ ký
     report = get(f"{BASE}/api/inspections/{saved['id']}/report.html")
     for needle in ("ĐÃ DUYỆT", "Trần Quản Lý", "KỸ SƯ KIỂM TRA"):
         assert needle in report, f"thiếu {needle} trong báo cáo"
     print("4) report OK: badge ĐÃ DUYỆT + 2 ô chữ ký")
+
+    # 4.8) Phase 2 hoàn chỉnh: phân loại lại hồ sơ ĐÃ LƯU từ px trong DB
+    boundary = uuid.uuid4().hex
+    parts = [
+        f"--{boundary}\r\nContent-Disposition: form-data; name=\"gsd_mm_per_px\"\r\n\r\n0.4\r\n".encode(),
+        f"--{boundary}\r\nContent-Disposition: form-data; name=\"through_flags\"\r\n\r\n[]\r\n".encode(),
+        f"--{boundary}--\r\n".encode(),
+    ]
+    req = Request(
+        f"{BASE}/api/inspections/{saved['id']}/severity",
+        data=b"".join(parts),
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    rec = json.load(urlopen(req))
+    assert rec["gsd_mm_per_px"] == 0.4, "GSD hồ sơ phải được cập nhật"
+    assert all(d["severity"] for d in rec["detections"]), "mọi vết phải có mức độ"
+    print("4.8) reclassify-lưu OK: GSD=0.4,",
+          sum(1 for d in rec["detections"] if d["severity"]), "vết có mức độ ✓")
 
     # 5) dashboard phản ánh số mới
     dash = json.loads(get(f"{BASE}/api/dashboard"))

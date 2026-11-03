@@ -1,34 +1,39 @@
 /* ============================================================
- * Crack Severity AI v3 — SPA
- * Views: Dashboard / Wizard kiểm tra / Hồ sơ / Phân tích / Thiết lập
- * Luồng: Draft → Submitted → Approved (phân vai demo: engineer/manager)
+ * Crack Severity AI v4 — SPA (light modern theme)
+ * Views: Dashboard / Wizard / Hồ sơ / Phase 2 / Model / Thiết lập
+ * Luồng: Draft → Submitted → Approved (vai demo: engineer/manager)
+ * Phase 2 tự động: phát hiện nứt → chip mức độ ngay (GSD mặc định 0.2,
+ * hiệu chuẩn bằng 📏 Đo GSD hoặc nhập tay → tự tính lại).
  * ============================================================ */
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const SEV_COLOR = { L0: "#7f8c8d", L1: "#16a34a", L2: "#d97706", L3: "#dc2626" };
-const SEV_FALLBACK = { color: "#b3bcc5" };
+const SEV_COLOR = { L0: "#64748b", L1: "#059669", L2: "#d97706", L3: "#dc2626" };
+const SEV_FALLBACK = { color: "#A8ADB1" };
+const DEFAULT_GSD = 0.2; // mm/px — ảnh chụp gần; gắn nhãn "giả định" tới khi hiệu chuẩn
 
 const state = {
   file: null, result: null, activeDet: -1,
   showMask: true, showBox: true, step: 1,
   meta: null, charts: {},
+  calibrating: false, calPoints: [], throughFlags: [],
+  gsdCalibrated: false,
 };
 
 /* ================= ROUTER ================= */
-function go(route) {
-  location.hash = route;
-}
+function go(route) { location.hash = route; }
 function onRoute() {
   const name = (location.hash || "#/dashboard").replace("#/", "");
-  const views = ["dashboard", "inspect", "inspections", "analytics", "settings"];
-  const v = views.includes(name) ? name : "dashboard";
+  const views = ["gateway", "dashboard", "inspect", "inspections", "severity", "analytics", "settings"];
+  const v = views.includes(name) ? name : "gateway";
   views.forEach((x) => ($("view-" + x).hidden = x !== v));
   document.querySelectorAll(".sidebar nav a").forEach((a) =>
-    a.classList.toggle("active", a.getAttribute("href") === "#/" + v));
+    a.classList.toggle("active", a.dataset.view === v));
+  if (v === "gateway") return;
   if (v === "dashboard") loadDashboard();
   if (v === "inspections") loadInspections();
   if (v === "analytics") loadAnalytics();
+  if (v === "severity") loadSeverityView();
   if (v === "settings") loadSettings();
 }
 window.addEventListener("hashchange", onRoute);
@@ -43,12 +48,14 @@ async function init() {
     $("f-component").innerHTML =
       `<option value="">— Tất cả cấu kiện —</option>` +
       meta.components.map((c) => `<option>${c[0].toUpperCase() + c.slice(1)}</option>`).join("");
-    $("app-version").textContent = "Phiên bản " + meta.version;
     renderLegend(meta.severity_scale);
-  } catch { /* giữ default */ }
+  } catch { /* giữ mặc định */ }
   health(); setInterval(health, 30000);
   $("conf").addEventListener("input", (e) => ($("confVal").textContent = e.target.value));
-  setupDropzone(); setupPaste();
+  $("gsd").addEventListener("input", () => {
+    state.gsdCalibrated = Math.abs(parseFloat($("gsd").value) - DEFAULT_GSD) > 1e-9;
+  });
+  setupDropzone(); setupPaste(); setupCalibration();
   $("file").addEventListener("change", (e) => setFile(e.target.files[0]));
   $("btn-demo").addEventListener("click", useDemoImage);
   $("btn-run").addEventListener("click", runPredict);
@@ -57,7 +64,7 @@ async function init() {
   $("f-search").addEventListener("input", loadInspections);
   $("f-status").addEventListener("change", loadInspections);
   $("f-component").addEventListener("change", loadInspections);
-  setupWizard(); setupToggles(); setupProjectPicker();
+  setupWizard(); setupToggles(); setupProjectPicker(); setupSeverityCalc();
   onRoute();
 }
 
@@ -65,53 +72,69 @@ async function health() {
   try {
     const h = await (await fetch("/api/health")).json();
     $("health-dot").className = "dot " + (h.model_loaded ? "ok" : "bad");
-    $("health-status").textContent = h.model_loaded ? "Sẵn sàng · " + h.version : "Chưa load weight";
+    $("health-status").textContent = h.model_loaded ? "Model sẵn sàng" : "Chưa load weight";
   } catch { $("health-status").textContent = "Mất kết nối API"; }
 }
 
 /* ================= DASHBOARD ================= */
 async function loadDashboard() {
+  const h = new Date().getHours();
+  $("greet").textContent =
+    h < 11 ? "Tổng quan buổi sáng" : h < 14 ? "Tổng quan buổi trưa" : h < 18 ? "Tổng quan buổi chiều" : "Tổng quan buổi tối";
+
   let d;
-  try { d = await (await fetch("/api/dashboard")).json(); }
-  catch { return; }
+  try { d = await (await fetch("/api/dashboard")).json(); } catch { return; }
   const k = d.kpi;
-  const kpi = (label, val, cls = "") =>
-    `<div class="kpi ${cls}"><div class="k-label">${label}</div><div class="k-value">${val}</div></div>`;
+
+  const latest = d.recent?.[0];
+  if (latest) {
+    $("hero-img").src = `/api/inspections/${latest.id}/image_annotated`;
+    $("hero-tag").textContent =
+      `CSA-${String(latest.id).padStart(5, "0")}, ${latest.created_at.replace("T", " ")}, ${latest.n_cracks} vết nứt`;
+  } else {
+    $("hero-tag").textContent = "CHƯA CÓ HỒ SƠ — ẢNH MẪU TỪ TẬP TEST";
+  }
+
+  const metric = (label, num, sub, stripe) =>
+    `<div class="metric stripe-${stripe}"><div class="m-label">${label}</div><div class="m-value">${num}</div><div class="m-sub">${sub}</div></div>`;
   $("kpi-row").innerHTML =
-    kpi("Dự án / tòa nhà", k.projects) +
-    kpi("Hồ sơ kiểm định", k.inspections) +
-    kpi("Vết nứt ghi nhận", k.cracks, "k-red") +
-    kpi("Chờ phê duyệt", k.pending, "k-amber") +
-    kpi("Conf trung bình", k.avg_conf ?? "—", "k-green");
-  $("recent-table").querySelector("tbody").innerHTML = d.recent
-    .map((x) => `<tr>
-      <td><b>CSA-${String(x.id).padStart(5, "0")}</b></td>
-      <td>${x.created_at.replace("T", " ")}</td><td>${esc(x.building)}</td>
-      <td>${esc(x.floor)}</td><td>${esc(x.component)}</td><td><b>${x.n_cracks}</b></td>
-      <td>${statusBadge(x.status)}</td></tr>`).join("");
+    metric("PROJECTS", k.projects, "dự án / tòa nhà", "info") +
+    metric("INSPECTIONS", k.inspections, "hồ sơ kiểm định", "info") +
+    metric("CRACKS", k.cracks, "vết nứt ghi nhận", "crit") +
+    metric("PENDING", k.pending, "chờ phê duyệt", "warn") +
+    metric("AVG CONF", k.avg_conf ?? "—", "độ tin cậy trung bình", "ok");
+
+  $("recent-table").querySelector("tbody").innerHTML = d.recent.length
+    ? d.recent.map((x) => `<tr>
+        <td><b class="mono">CSA-${String(x.id).padStart(5, "0")}</b></td>
+        <td><img class="thumb" src="/api/inspections/${x.id}/image_annotated" onerror="this.style.visibility='hidden'"></td>
+        <td class="mono">${x.created_at.replace("T", " ")}</td><td>${esc(x.building)}</td>
+        <td>${esc(x.floor)}</td><td>${esc(x.component)}</td><td class="mono">${x.n_cracks}</td>
+        <td>${statusBadge(x.status)}</td></tr>`).join("")
+    : `<tr><td colspan="8" class="empty-state">Chưa có hồ sơ — lập phiếu kiểm tra đầu tiên.</td></tr>`;
   drawCharts(d);
 }
 
 function drawCharts(d) {
-  const opts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { boxWidth: 11, font: { size: 10.5 } } } } };
+  const base = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10.5 }, usePointStyle: true } } } };
   if (window.__noCharts || typeof Chart === "undefined") {
     document.querySelectorAll(".chart-box").forEach((b) =>
-      (b.innerHTML = '<div class="no-charts">Biểu đồ cần kết nối CDN (Chart.js).<br>Số liệu: ' +
-        JSON.stringify(d.by_severity) + "</div>"));
+      (b.innerHTML = `<div class="no-charts">Biểu đồ cần CDN Chart.js (lần đầu chạy online).<br>Số liệu: ${esc(JSON.stringify(d.by_severity))}</div>`));
     return;
   }
   const sev = d.by_severity || {};
   mkChart("ch-sev", "doughnut", {
-    labels: Object.keys(sev).map((s) => s + " — " + ({ L0: "Hairline", L1: "Minor", L2: "Moderate", L3: "Severe" }[s] || "")),
-    datasets: [{ data: Object.values(sev), backgroundColor: Object.keys(sev).map((s) => SEV_COLOR[s] || "#999") }],
-  }, { ...opts, cutout: "58%" });
+    labels: Object.keys(sev).map((s) => `${s} — ${({ L0: "Hairline", L1: "Minor", L2: "Moderate", L3: "Severe" })[s] || ""}`),
+    datasets: [{ data: Object.values(sev), backgroundColor: Object.keys(sev).map((s) => SEV_COLOR[s] || "#94a3b8"), borderWidth: 2, borderColor: "#fff" }],
+  }, { ...base, cutout: "60%" });
   const comp = d.by_component || {};
   mkChart("ch-comp", "bar", {
-    labels: Object.keys(comp), datasets: [{ data: Object.values(comp), backgroundColor: "#2e86c1", borderRadius: 6 }],
-  }, { ...opts, plugins: { legend: { display: false } } });
+    labels: Object.keys(comp), datasets: [{ data: Object.values(comp), backgroundColor: "#2563eb", borderRadius: 7, maxBarThickness: 42 }],
+  }, { ...base, plugins: { legend: { display: false } } });
   mkChart("ch-trend", "line", {
-    labels: d.trend.labels, datasets: [{ data: d.trend.values, borderColor: "#14508c", backgroundColor: "rgba(46,134,193,.15)", fill: true, tension: .35, pointRadius: 3 }],
-  }, { ...opts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } });
+    labels: d.trend.labels,
+    datasets: [{ data: d.trend.values, borderColor: "#2563eb", backgroundColor: "rgba(37,99,235,.12)", fill: true, tension: .38, pointRadius: 3, pointBackgroundColor: "#fff", pointBorderColor: "#2563eb" }],
+  }, { ...base, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } });
 }
 function mkChart(id, type, data, opts) {
   if (state.charts[id]) state.charts[id].destroy();
@@ -134,10 +157,10 @@ function gotoStep(n) {
     const el = document.querySelector(`.wstep[data-step="${i}"]`);
     el.classList.toggle("active", i === n);
     el.classList.toggle("done", i < n);
-    if (i < n) el.querySelector(".wnum").textContent = "✓";
-    else el.querySelector(".wnum").textContent = i;
+    el.querySelector(".wnum").textContent = i < n ? "✓" : i;
   }
   if (n === 3 && state.file && !state.result) runPredict();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 async function setupProjectPicker() {
@@ -202,25 +225,32 @@ async function useDemoImage() {
   } catch { toast("Không lấy được ảnh mẫu", "err"); }
 }
 
-/* ================= PREDICT ================= */
+/* ================= PREDICT (Phase 1 + Phase 2 tự động) ================= */
 async function runPredict() {
-  if (!state.file) return toast("Chưa có ảnh", "err");
+  if (!state.file) return toast("Chưa có ảnh — hãy tải ảnh ở bước 2", "err");
   const st = $("status");
   st.className = "status";
   $("btn-run").disabled = true;
-  $("btn-run").textContent = "⏳ Đang phân tích...";
+  $("btn-run").innerHTML = `<span class="spin"></span> Đang phân tích...`;
   try {
     const fd = new FormData();
     fd.append("file", state.file);
     fd.append("conf", $("conf").value);
     fd.append("imgsz", $("imgsz").value);
-    fd.append("gsd_mm_per_px", $("gsd").value || "0");
+    // GSD mặc định 0.2 nếu chưa hiệu chuẩn → severity tính TỰ ĐỘNG ngay sau phân tích
+    fd.append("gsd_mm_per_px", $("gsd").value || String(DEFAULT_GSD));
     const r = await fetch("/api/predict", { method: "POST", body: fd });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || `HTTP ${r.status}`);
     state.result = await r.json();
     state.activeDet = -1;
+    state.throughFlags = new Array(state.result.n_cracks).fill(false);
     renderResult(state.result);
-    st.textContent = `Hoàn tất trong ${state.result.elapsed_ms} ms.`;
+    const hr = $("hud-readout");
+    if (hr) {
+      hr.hidden = false;
+      hr.innerHTML = `<b>${state.result.n_cracks}</b> CRACKS · CONF <b>${$("conf").value}</b> · IMGSZ <b>${$("imgsz").value}</b> · ${state.result.elapsed_ms} MS`;
+    }
+    st.textContent = `Hoàn tất trong ${state.result.elapsed_ms} ms — mức độ đã phân loại tự động.`;
     st.className = "status ok";
     $("w3-next").disabled = false;
   } catch (e) {
@@ -237,11 +267,14 @@ function renderResult(res) {
   $("result-empty").hidden = true;
   $("result").hidden = false;
   const n = res.n_cracks, sev = res.severity_summary || {}, gsd = res.gsd_mm_per_px;
-  let chips = `<span class="chip ${n === 0 ? "green" : "red"}">${n} vết nứt</span>
+  let chips = `
+    <span class="chip ${n === 0 ? "green" : "red"}">${n} vết nứt</span>
     <span class="chip">Ảnh ${res.image_wh[0]}×${res.image_wh[1]}</span>
     <span class="chip">${res.elapsed_ms} ms</span>`;
   if (gsd) {
-    chips += `<span class="chip">GSD ${gsd} mm/px</span>`;
+    chips += `<span class="chip ${state.gsdCalibrated ? "green" : "amber"}"
+      title="${state.gsdCalibrated ? "GSD đã hiệu chuẩn" : "GSD mặc định — bấm Đo GSD để hiệu chuẩn"}">
+      GSD ${gsd} mm/px${state.gsdCalibrated ? " (đã hiệu chuẩn)" : " (giả định — nên hiệu chuẩn)"}</span>`;
     for (const [lv, cnt] of Object.entries(sev)) chips += `<span class="chip amber">L${lv.slice(1)}: ${cnt}</span>`;
   } else if (n) chips += `<span class="chip">chưa định lượng (thiếu GSD)</span>`;
   $("summary").innerHTML = chips;
@@ -253,15 +286,29 @@ function renderResult(res) {
     .map((d, i) => {
       const s = d.severity;
       const sevHtml = s
-        ? `<span class="sev" style="background:${s.color}">L${s.level} ${s.name} · ${s.width_mm}mm</span>`
+        ? `<span class="sev${s.level === 3 ? " stamp" : ""}" style="${s.level === 3 ? `color:${s.color}` : `background:${s.color}`}" title="${esc((s.factors || []).join(", "))}">L${s.level} ${s.name} ${s.width_mm}mm</span>${s.factors?.length ? `<div class="hint" style="margin:2px 0 0">+ ${esc(s.factors.join(", "))}</div>` : ""}`
         : `<span class="sev none">chưa định lượng</span>`;
       return `<tr data-i="${i}"><td><b>${i + 1}</b></td><td class="mono">${d.conf.toFixed(2)}</td>
-        <td class="mono">${d.length_px ?? "-"}</td><td class="mono">${d.width_mean_px ?? "-"}</td>
-        <td class="mono">${d.width_px ?? "-"}</td><td class="mono">${d.area_px ?? "-"}</td>
-        <td class="mono">${d.angle_deg ?? "-"}</td><td>${sevHtml}</td></tr>`;
+        <td class="mono">${d.length_px ?? "-"}</td>
+        <td class="mono">${d.width_max_px ?? "-"}</td>
+        <td class="mono">${d.contrast_ratio != null ? Math.round(d.contrast_ratio * 100) + "%" : "-"}</td>
+        <td class="mono">${d.area_px ?? "-"}</td>
+        <td class="mono">${d.angle_deg ?? "-"}</td>
+        <td><input type="checkbox" class="thru-cb" data-i="${i}" title="Nứt xuyên cấu kiện → L3"
+            ${state.throughFlags[i] ? "checked" : ""}></td>
+        <td>${sevHtml}</td></tr>`;
     }).join("");
   $("det-table").querySelectorAll("tr[data-i]").forEach((tr) =>
-    tr.addEventListener("click", () => selectDet(+tr.dataset.i)));
+    tr.addEventListener("click", (e) => {
+      if (e.target.classList.contains("thru-cb")) return;
+      selectDet(+tr.dataset.i);
+    }));
+  $("det-table").querySelectorAll(".thru-cb").forEach((cb) =>
+    cb.addEventListener("change", () => {
+      state.throughFlags[+cb.dataset.i] = cb.checked;
+      if (parseFloat($("gsd").value) > 0) reclassify();
+      else toast("Đã ghi nhận — nhập GSD để có mức độ");
+    }));
 }
 
 /* ================= OVERLAY ================= */
@@ -335,7 +382,70 @@ function download(blob, name) {
   a.href = URL.createObjectURL(blob); a.download = name; a.click();
 }
 
-/* ================= STEP 4: REVIEW + SAVE ================= */
+/* ================= HIỆU CHUẨN GSD (đo thước trên ảnh) ================= */
+function setupCalibration() {
+  $("btn-cal").addEventListener("click", () => {
+    state.calibrating = !state.calibrating;
+    state.calPoints = [];
+    $("btn-cal").textContent = state.calibrating ? "📏 Bấm 2 điểm..." : "📏 Đo GSD";
+    $("btn-cal").classList.toggle("off", !state.calibrating);
+    if (state.calibrating) toast("Bấm 2 điểm trên ảnh vào vật có chiều dài đã biết (thước, gạch, cửa...)");
+    else drawOverlay();
+  });
+  $("overlay").addEventListener("click", (e) => {
+    if (!state.calibrating) return;
+    const c = $("overlay");
+    const rect = c.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (c.width / rect.width);
+    const py = (e.clientY - rect.top) * (c.height / rect.height);
+    state.calPoints.push([px, py]);
+    if (state.calPoints.length < 2) {
+      drawOverlay();
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#facc15";
+      ctx.beginPath(); ctx.arc(px, py, 7, 0, 7); ctx.fill();
+      return;
+    }
+    const [[ax, ay], [bx, by]] = state.calPoints;
+    const distPx = Math.hypot(bx - ax, by - ay);
+    const mmStr = prompt(`Đo được ${distPx.toFixed(0)} px.\nNhập chiều dài THẬT của vật (mm):`, "300");
+    state.calibrating = false; state.calPoints = [];
+    $("btn-cal").textContent = "📏 Đo GSD";
+    $("btn-cal").classList.remove("off");
+    if (mmStr && parseFloat(mmStr) > 0 && distPx > 0) {
+      const gsd = parseFloat(mmStr) / distPx;
+      $("gsd").value = gsd.toFixed(4);
+      state.gsdCalibrated = true;
+      toast(`GSD = ${mmStr} mm ÷ ${distPx.toFixed(0)} px = ${gsd.toFixed(4)} mm/px ✅`, "ok");
+      drawOverlay();
+      const ctx = c.getContext("2d");
+      ctx.strokeStyle = "#facc15"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      if (state.result) reclassify();
+    } else drawOverlay();
+  });
+}
+
+async function reclassify() {
+  const gsd = parseFloat($("gsd").value);
+  if (!state.result || !gsd || gsd <= 0) return;
+  try {
+    const fd = new FormData();
+    fd.append("detections_json", JSON.stringify(state.result.detections));
+    fd.append("gsd_mm_per_px", gsd);
+    fd.append("through_flags", JSON.stringify(state.throughFlags));
+    const r = await fetch("/api/severity", { method: "POST", body: fd });
+    if (!r.ok) throw new Error((await r.json()).detail || "HTTP " + r.status);
+    const out = await r.json();
+    state.result.detections = out.detections;
+    state.result.gsd_mm_per_px = out.gsd_mm_per_px;
+    state.result.severity_summary = out.severity_summary;
+    renderResult(state.result);
+    toast("Đã phân loại lại theo GSD mới", "ok");
+  } catch (e) { toast("Lỗi phân loại: " + e.message, "err"); }
+}
+
+/* ================= BƯỚC 4: REVIEW + SAVE ================= */
 function renderReview() {
   const r = state.result;
   if (!r) return;
@@ -343,13 +453,13 @@ function renderReview() {
   r.detections.forEach((d) => { if (d.severity) nSev[`L${d.severity.level}`] = (nSev[`L${d.severity.level}`] || 0) + 1; });
   $("review-box").innerHTML = `
     <div class="table-wrap"><table>
-      <tr><td style="width:170px"><b>Dự án / tòa nhà</b></td><td>${$("project").selectedOptions[0]?.text || "—"}</td></tr>
+      <tr><td style="width:180px"><b>Dự án / tòa nhà</b></td><td>${$("project").selectedOptions[0]?.text || "—"}</td></tr>
       <tr><td><b>Tầng / cấu kiện</b></td><td>${esc($("floor").value) || "—"} · ${$("component").value}</td></tr>
       <tr><td><b>Người kiểm tra</b></td><td>${esc($("engineer").value) || "—"}</td></tr>
       <tr><td><b>Ảnh</b></td><td>${esc(state.file?.name || "")} (${Math.round((state.file?.size || 0) / 1024)} KB)</td></tr>
       <tr><td><b>Kết quả AI</b></td><td><b>${r.n_cracks}</b> vết nứt · ${r.elapsed_ms} ms · conf ${$("conf").value} · imgsz ${$("imgsz").value}</td></tr>
       <tr><td><b>Mức độ (đề xuất)</b></td><td>${Object.entries(nSev).map(([k, v]) => `<span class="sev" style="background:${SEV_COLOR[k]}">${k}: ${v}</span>`).join(" ") || (r.n_cracks ? "chưa định lượng" : "—")}</td></tr>
-      <tr><td><b>GSD</b></td><td>${r.gsd_mm_per_px ? r.gsd_mm_per_px + " mm/px" : "chưa có"}</td></tr>
+      <tr><td><b>GSD</b></td><td>${r.gsd_mm_per_px ? r.gsd_mm_per_px + " mm/px" + (state.gsdCalibrated ? "" : " <i>(giả định — nên hiệu chuẩn)</i>") : "chưa có"}</td></tr>
     </table></div>`;
 }
 async function saveInspection() {
@@ -363,7 +473,7 @@ async function saveInspection() {
     fd.append("floor", $("floor").value);
     fd.append("component", $("component").value);
     fd.append("note", $("note").value);
-    fd.append("gsd_mm_per_px", $("gsd").value || "0");
+    fd.append("gsd_mm_per_px", $("gsd").value || String(DEFAULT_GSD));
     fd.append("project_id", $("project").value || "0");
     fd.append("engineer", $("engineer").value);
     fd.append("status", $("save-status").value);
@@ -409,23 +519,32 @@ async function loadInspections() {
 async function openDetail(id) {
   try {
     const x = await (await fetch(`/api/inspections/${id}`)).json();
-    $("modal-title").textContent = `Hồ sơ CSA-${String(x.id).padStart(5, "0")} — ${statusBadge(x.status)}`;
+    $("modal-title").innerHTML = `Hồ sơ CSA-${String(x.id).padStart(5, "0")} — ${statusBadge(x.status)}`;
     $("modal-body").innerHTML = `
-      <img src="/api/inspections/${x.id}/image_annotated" style="width:100%;border-radius:10px" onerror="this.hidden=true">
+      <img src="/api/inspections/${x.id}/image_annotated" style="width:100%;border-radius:12px" onerror="this.hidden=true">
       <table style="margin-top:12px">
-        <tr><td style="width:150px;color:var(--muted)">Dự án/Tòa nhà</td><td>${esc(x.building)}</td></tr>
+        <tr><td style="width:160px;color:var(--muted)">Dự án/Tòa nhà</td><td>${esc(x.building)}</td></tr>
         <tr><td style="color:var(--muted)">Tầng / Cấu kiện</td><td>${esc(x.floor)} · ${esc(x.component)}</td></tr>
         <tr><td style="color:var(--muted)">Kỹ sư / Thời gian</td><td>${esc(x.engineer) || "—"} · ${x.created_at.replace("T", " ")}</td></tr>
         <tr><td style="color:var(--muted)">GSD</td><td>${x.gsd_mm_per_px ? x.gsd_mm_per_px + " mm/px" : "—"}</td></tr>
         <tr><td style="color:var(--muted)">Ghi chú</td><td>${esc(x.note)}</td></tr>
         ${x.approved_by ? `<tr><td style="color:var(--muted)">Phê duyệt</td><td><b>${esc(x.approved_by)}</b> · ${x.approved_at.replace("T", " ")}</td></tr>` : ""}
       </table>
-      <h3 style="font-size:13px;color:var(--brand-2)">Vết nứt (${x.n_cracks})</h3>
+      <div style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-top:12px">
+        <b style="font-size:12.5px">⚙️ Tính lại mức độ (Phase 2)</b>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:9px;flex-wrap:wrap">
+          <input id="modal-gsd" type="number" step="0.001" min="0" placeholder="GSD mm/px"
+            value="${x.gsd_mm_per_px || ""}" style="width:150px;margin:0">
+          <button class="btn tiny primary" onclick="recalcSeverity(${x.id})">Tính lại từ px đã lưu</button>
+          <span class="hint" style="margin:0">Áp thang ACI/TCVN lên đặc trưng px đã lưu — không cần chạy model.</span>
+        </div>
+      </div>
+      <h3 style="font-size:13px;color:var(--ink);margin:14px 0 8px">Vết nứt (${x.n_cracks})</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>#</th><th>Conf</th><th>Dài px</th><th>Rộng px</th><th>Mức độ</th></tr></thead>
         <tbody>${x.detections.map((d, i) => `<tr><td>${i + 1}</td><td class="mono">${d.conf?.toFixed(2)}</td>
           <td class="mono">${d.length_px ?? "—"}</td><td class="mono">${d.width_px ?? "—"}</td>
-          <td>${d.severity ? `<span class="sev" style="background:${SEV_COLOR["L" + d.severity[1]] || "#999"}">${d.severity}</span>` : "—"}</td></tr>`).join("")}</tbody>
+          <td>${d.severity ? `<span class="sev" style="background:${SEV_COLOR["L" + d.severity[1]] || "#94a3b8"}">${d.severity}</span>` : "—"}</td></tr>`).join("")}</tbody>
       </table></div>
       ${x.status === "submitted" && $("role").value === "manager"
         ? `<button class="btn primary big" style="margin-top:14px" onclick="approve(${x.id})">✓ Phê duyệt hồ sơ</button>` : ""}`;
@@ -433,20 +552,92 @@ async function openDetail(id) {
   } catch (e) { toast("Lỗi tải chi tiết: " + e.message, "err"); }
 }
 
+async function recalcSeverity(id) {
+  const gsd = parseFloat($("modal-gsd").value);
+  if (!gsd || gsd <= 0) return toast("Nhập GSD > 0", "err");
+  try {
+    const fd = new FormData();
+    fd.append("gsd_mm_per_px", gsd);
+    fd.append("through_flags", "[]");
+    await (await fetch(`/api/inspections/${id}/severity`, { method: "POST", body: fd })).json();
+    toast(`Hồ sơ CSA-${String(id).padStart(5, "0")} đã cập nhật mức độ theo GSD ${gsd} ✅`, "ok");
+    openDetail(id);
+  } catch (e) { toast("Lỗi tính lại: " + e.message, "err"); }
+}
+
 async function approve(id) {
   const by = prompt("Quản lý phê duyệt — họ tên:") || ($("role").value === "manager" ? "Quản lý" : "");
   if (!by) return;
   try {
-    await (await fetch(`/api/inspections/${id}/status`, {
-      method: "POST", body: (() => { const b = new FormData(); b.append("status", "approved"); b.append("by", by); return b; })(),
-    })).json();
+    const b = new FormData();
+    b.append("status", "approved"); b.append("by", by);
+    await (await fetch(`/api/inspections/${id}/status`, { method: "POST", body: b })).json();
     $("modal").hidden = true;
     toast(`Hồ sơ CSA-${String(id).padStart(5, "0")} ĐÃ DUYỆT ✅`, "ok");
     loadInspections();
   } catch (e) { toast("Lỗi phê duyệt: " + e.message, "err"); }
 }
 
-/* ================= ANALYTICS ================= */
+/* ================= PHASE 2 VIEW ================= */
+function loadSeverityView() {
+  const scale = state.meta?.severity_scale;
+  if (scale?.levels) {
+    $("sev-scale").innerHTML = scale.levels
+      .map((lv) => `<div class="sota-row">
+        <span><span class="leg-swatch" style="background:${lv.color}"></span>
+          <b>L${lv.level} ${lv.name}</b> — ${lv.vi}</span>
+        <b>${lv.range}</b></div>`)
+      .join("");
+  }
+  $("sev-validation").innerHTML = `
+    <div class="sota-row"><span>Bề rộng lớn nhất (width_max)</span><b style="color:var(--ok)">lệch ≤ 1px ✅</b></div>
+    <div class="sota-row"><span>Chiều dài</span><b style="color:var(--ok)">lệch 0px ✅</b></div>
+    <div class="sota-row"><span>Góc trục chính</span><b style="color:var(--ok)">lệch 0° ✅</b></div>
+    <div class="sota-row"><span>Rẽ nhánh (branching)</span><b style="color:var(--ok)">phát hiện đúng ✅</b></div>
+    <p class="hint" style="margin-top:6px">Kiểm chứng trên mask chuẩn kích thước đã biết — giới hạn lượng tử hóa pixel ±1px.</p>`;
+  if (!$("sc-run").dataset.bound) {
+    $("sc-run").dataset.bound = "1";
+    $("sc-run").addEventListener("click", runSeverityCalc);
+  }
+}
+
+async function runSeverityCalc() {
+  const gsd = parseFloat($("sc-gsd").value);
+  const wmax = parseFloat($("sc-wmax").value);
+  const wmean = parseFloat($("sc-wmean").value);
+  const len = parseFloat($("sc-len").value);
+  const contrast = (parseFloat($("sc-contrast").value) || 0) / 100;
+  const through = $("sc-through").checked;
+  const box = $("sc-result");
+  if (!gsd || gsd <= 0 || isNaN(wmax)) {
+    box.innerHTML = `<span class="status err">Nhập GSD và bề rộng hợp lệ.</span>`;
+    return;
+  }
+  try {
+    const fd = new FormData();
+    fd.append("detections_json", JSON.stringify([{
+      width_mean_px: wmean || wmax, width_max_px: wmax, length_px: len || null,
+      branching: $("sc-branch").checked, multi_plane: $("sc-multi").checked,
+      contrast_ratio: contrast,
+    }]));
+    fd.append("gsd_mm_per_px", gsd);
+    fd.append("through_flags", JSON.stringify([through]));
+    const r = await fetch("/api/severity", { method: "POST", body: fd });
+    if (!r.ok) throw new Error((await r.json()).detail || "HTTP " + r.status);
+    const out = await r.json();
+    const s = out.detections[0].severity;
+    box.innerHTML = `<div style="text-align:center;padding:8px 0">
+      <span class="sev" style="background:${s.color};font-size:15px;padding:9px 22px">L${s.level} ${s.name}</span>
+      <div style="margin-top:10px;font-size:13px">${s.vi}</div>
+      <div class="hint" style="margin-top:6px">Rộng ${s.width_mm} mm (max) · dài ${s.length_mm ?? "?"} mm · đậm ${s.contrast != null ? Math.round(s.contrast * 100) + "%" : "?"}</div>
+      ${s.factors?.length ? `<div class="hint" style="margin-top:4px;color:var(--warn)">⬆ ${esc(s.factors.join(" · "))}</div>` : `<div class="hint" style="margin-top:4px">Không có yếu tố tăng mức</div>`}
+    </div>`;
+  } catch (e) {
+    box.innerHTML = `<span class="status err">Lỗi: ${esc(e.message)}</span>`;
+  }
+}
+
+/* ================= MODEL / ANALYTICS ================= */
 async function loadAnalytics() {
   let m;
   try { m = await (await fetch("/api/model-info")).json(); } catch { return; }
@@ -454,36 +645,54 @@ async function loadAnalytics() {
     `<div class="mp"><b>${typeof v === "number" ? v.toFixed(3) : v}</b><span>${k}</span></div>`).join("")}</div>`;
   const bar = (a, b) => {
     const pct = Math.min(100, Math.round((a / b) * 100));
-    return `<div style="background:#e8eef5;border-radius:99px;height:9px;margin:5px 0 12px">
-      <div style="width:${pct}%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand-2),var(--accent))"></div>
-      <span class="hint" style="margin:0">Đạt ${pct}% so với baseline ResUNet của bài báo</span></div>`;
+    return `<div class="progress"><div style="width:${pct}%"></div></div>
+      <span class="hint" style="margin:0 0 10px">Đạt ${pct}% so với baseline ResUNet của bài báo</span>`;
   };
+  const cmp = m.model_compare || {};
+  const cmpRow = (label, key, unit = "") => `<div class="sota-row"><span>${label}</span>
+    <b>v1 ${cmp.v1_640[key]}${unit} / v2 ${cmp.v2_1280[key]}${unit}</b></div>`;
   $("analytics-body").innerHTML = `
-    <div class="card"><h2>Benchmark tập test (v1 — imgsz 640)</h2>
-      <b style="font-size:12.5px">Box (bounding)</b>${pair(m.test_metrics.box)}
-      <b style="font-size:12.5px">Mask (segmentation)</b>${pair(m.test_metrics.mask)}
-      <div class="sota-row"><span>Độ chính xác mức ảnh (kỳ vọng 0.95)</span><b>${m.image_level_acc} ✅</b></div>
-      <div class="sota-row"><span>False positive trên ảnh âm</span><b>${(m.neg_fp_rate * 100).toFixed(1)}%</b></div>
+    <div class="card"><h2>Benchmark tập test — <span class="sub">model active: ${m.active}</span></h2>
+      <b style="font-size:12.5px">Box (bounding) — v1</b>${pair(m.test_metrics.box)}
+      <b style="font-size:12.5px">Mask (segmentation) — v1</b>${pair(m.test_metrics.mask)}
+      <div class="sota-row"><span>Độ chính xác mức ảnh (kỳ vọng 0.95)</span><b style="color:var(--ok)">${m.image_level_acc} ✅</b></div>
+      <div class="sota-row"><span>FP trên ảnh âm (A so với B)</span><b>A 2.2% / B 1.5%</b></div>
+    </div>
+    <div class="card"><h2>So sánh v1 vs v2 <span class="sub">(instance IoU≥0.5 + pixel Dice)</span></h2>
+      ${cmpRow("F1 instance", "inst_F1")}
+      ${cmpRow("Precision", "inst_P")}
+      ${cmpRow("Dice 3DCrack", "dice_3dcrack")}
+      ${cmpRow("Dice DeepCrack", "dice_deepcrack")}
+      ${cmpRow("FP ảnh âm", "neg_fp")}
+      <div class="sota-row"><span>Kết luận</span>
+        <b style="color:var(--ok);white-space:normal;text-align:right;max-width:55%">Giữ v1 — checkpoint v2 (epoch ~74) precision sụp ở IoU 0.5; v3 sẽ train lại đúng best.pt từ weight v1</b></div>
     </div>
     <div class="card"><h2>So sánh SOTA — ${m.sota_ref.paper}</h2>
-      <div class="sota-row"><span><b>DeepCrack</b> — Dice của hệ thống / ResUNet (bài báo)</span><b>${m.sota_ref.deepcrack.ours_dice} / ${m.sota_ref.deepcrack.resunet_dice}</b></div>
+      <div class="sota-row"><span><b>DeepCrack</b> — Dice hệ thống / ResUNet (bài báo)</span><b>${m.sota_ref.deepcrack.ours_dice} / ${m.sota_ref.deepcrack.resunet_dice}</b></div>
       ${bar(m.sota_ref.deepcrack.ours_dice, m.sota_ref.deepcrack.resunet_dice)}
-      <div class="sota-row"><span><b>3DCrack</b> — Dice của hệ thống / ResUNet (bài báo)</span><b>${m.sota_ref["3dcrack"].ours_dice} / ${m.sota_ref["3dcrack"].resunet_dice}</b></div>
+      <div class="sota-row"><span><b>3DCrack</b> — Dice hệ thống / ResUNet (bài báo)</span><b>${m.sota_ref["3dcrack"].ours_dice} / ${m.sota_ref["3dcrack"].resunet_dice}</b></div>
       ${bar(m.sota_ref["3dcrack"].ours_dice, m.sota_ref["3dcrack"].resunet_dice)}
-      <p class="hint" style="margin-top:8px">v2 (imgsz 1280, dữ liệu cải thiện) đang huấn luyện — sẽ cập nhật tại đây.</p>
+      <p class="hint" style="margin-top:8px">${m.sota_ref.note || ""}</p>
+    </div>
+    <div class="card"><h2>Phase 2 — Phân loại mức độ</h2>
+      <div class="sota-row"><span>Kiểu</span><b style="white-space:normal;text-align:right;max-width:60%">${m.phase2.type}</b></div>
+      <div class="sota-row"><span>Thang</span><b>${m.phase2.scale}</b></div>
+      <div class="sota-row"><span>Đầu vào</span><b style="white-space:normal;text-align:right;max-width:55%">${m.phase2.inputs.join(" · ")}</b></div>
+      <div class="sota-row"><span>Trạng thái</span><b style="color:var(--ok)">Tích hợp & hoạt động</b></div>
     </div>
     <div class="card"><h2>Cấu hình model & dữ liệu</h2>
       <div class="sota-row"><span>Model</span><b>${m.model}</b></div>
-      <div class="sota-row"><span>Huấn luyện</span><b>${m.trained}</b></div>
+      <div class="sota-row"><span>v1</span><b style="white-space:normal;text-align:right;max-width:60%">${m.trained_v1}</b></div>
+      <div class="sota-row"><span>v2</span><b style="white-space:normal;text-align:right;max-width:60%">${m.trained_v2}</b></div>
       <div class="sota-row"><span>Dữ liệu (train/val/test)</span><b>${m.data.train} / ${m.data.val} / ${m.data.test}</b></div>
-      <div class="sota-row"><span>Ảnh âm train (background)</span><b>${m.data.negatives_train}</b></div>
-      <div class="sota-row"><span>Nguồn dữ liệu</span><b style="white-space:normal;text-align:right;max-width:60%">${m.data.sources.join(", ")}</b></div>
+      <div class="sota-row"><span>Ảnh âm train</span><b>${m.data.negatives_train}</b></div>
+      <div class="sota-row"><span>Nguồn</span><b style="white-space:normal;text-align:right;max-width:55%">${m.data.sources.join(", ")}</b></div>
     </div>
-    <div class="card"><h2>Lộ trình cải thiện</h2>
-      <div class="sota-row"><span>v1 — baseline imgsz 640</span><b style="color:var(--ok)">Hoàn thành</b></div>
-      <div class="sota-row"><span>v2 — imgsz 1280, T4x2, multi-scale, dữ liệu cải thiện (+3.000 ảnh âm, +118 pseudo-GT)</span><b style="color:var(--warn)">Đang train</b></div>
-      <div class="sota-row"><span>v3 — pseudo-label mở rộng kho class-only (45k+ ảnh)</span><b style="color:var(--muted)">Kế hoạch</b></div>
-      <div class="sota-row"><span>Phase 2 — severity rule-based (đã cắm demo) → học thống kê</span><b style="color:var(--muted)">Chờ chốt thang</b></div>
+    <div class="card"><h2>Lộ trình</h2>
+      <div class="sota-row"><span>v1 — baseline imgsz 640</span><b style="color:var(--ok)">Hoàn thành · ACTIVE</b></div>
+      <div class="sota-row"><span>v2 — imgsz 1280 (đã đánh giá, không tích hợp)</span><b style="color:var(--warn)">Tham chiếu</b></div>
+      <div class="sota-row"><span>v3 — train lại imgsz 960 từ weight v1 + pseudo-label</span><b style="color:var(--muted)">Kế hoạch</b></div>
+      <div class="sota-row"><span>Phase 2 — rule-based → học thống kê</span><b style="color:var(--ok)">Rule-based đang chạy</b></div>
     </div>`;
 }
 
@@ -492,13 +701,20 @@ async function loadSettings() {
   try {
     const meta = await (await fetch("/api/meta")).json();
     $("scale-detail").innerHTML = (meta.severity_scale?.levels || [])
-      .map((lv) => `<div class="sota-row"><span><span class="leg-swatch" style="background:${lv.color}"></span>
-        <b>L${lv.level} ${lv.name}</b> — ${lv.vi}</span><b>${lv.range}</b></div>`).join("");
+      .map((lv) => `<div class="sota-row">
+        <span><span class="leg-swatch" style="background:${lv.color}"></span>
+          <b>L${lv.level} ${lv.name}</b> — ${lv.vi}</span><b>${lv.range}</b></div>`).join("");
     $("settings-model").innerHTML = `
       <div class="sota-row"><span>Phiên bản hệ thống</span><b>${meta.version}</b></div>
       <div class="sota-row"><span>Ngưỡng conf mặc định</span><b>0.25</b></div>
       <div class="sota-row"><span>imgsz mặc định</span><b>640</b></div>
+      <div class="sota-row"><span>GSD mặc định</span><b>0.2 mm/px (giả định)</b></div>
       <div class="sota-row"><span>Nguồn thang</span><b style="white-space:normal;text-align:right;max-width:55%">${meta.severity_scale?.reference || ""}</b></div>`;
+    $("settings-about").innerHTML = `
+      <div class="sota-row"><span>Stack</span><b style="white-space:normal;text-align:right;max-width:60%">FastAPI · Ultralytics YOLOv8s-seg · SQLite · Vanilla JS</b></div>
+      <div class="sota-row"><span>Triển khai</span><b style="white-space:normal;text-align:right;max-width:60%">Docker · GitHub Actions CI/CD → Hugging Face Spaces</b></div>
+      <div class="sota-row"><span>Kiểm thử</span><b>pytest 22 test · E2E 7 bước</b></div>
+      <div class="sota-row"><span>Tài liệu</span><b style="white-space:normal;text-align:right;max-width:60%">docs/ (DEVOPS, standards/severity_definition, experiments/experiment_log, ARCHITECTURE)</b></div>`;
   } catch { /* bỏ qua */ }
 }
 

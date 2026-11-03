@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"secondary-fixed":"#dbe1ff","on-error":"#ffffff","on-tertiary-container":"#fcfcff","surface-dim":"#cbdbf5","on-surface-variant":"#3f4850","error-container":"#ffdad6","tertiary":"#00628d","surface-tint":"#006398","inverse-primary":"#93ccff","primary":"#006194","surface-bright":"#f8f9ff","surface-container-highest":"#d3e4fe","surface-container-high":"#dce9ff","primary-container":"#007bb9","outline-variant":"#bfc7d2","on-tertiary-fixed-variant":"#004c6e","secondary-fixed-dim":"#b4c5ff","surface-container-lowest":"#ffffff","on-secondary-fixed-variant":"#003ea8","primary-fixed":"#cce5ff","on-tertiary":"#ffffff","inverse-surface":"#213145","surface-container-low":"#eff4ff","primary-fixed-dim":"#93ccff","on-surface":"#0b1c30","tertiary-fixed":"#c9e6ff","on-primary-fixed":"#001d31","on-primary-fixed-variant":"#004b73","on-secondary-container":"#fefcff","on-background":"#0b1c30","error":"#ba1a1a","surface":"#f8f9ff","on-primary":"#ffffff","surface-container":"#e5eeff","tertiary-container":"#007cb1","on-secondary":"#ffffff","secondary-container":"#316bf3","outline":"#707881","tertiary-fixed-dim":"#89ceff","background":"#f8f9ff","on-error-container":"#93000a","on-tertiary-fixed":"#001e2f","secondary":"#0051d5","on-secondary-fixed":"#00174b","inverse-on-surface":"#eaf1ff","surface-variant":"#d3e4fe","on-primary-container":"#fdfcff"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin":"2rem","space-xl":"2.5rem","space-xs":"0.25rem","margin-mobile":"1rem","space-sm":"0.5rem","gutter-mobile":"0.75rem","gutter":"1.25rem","space-lg":"1.5rem","space-md":"1rem"},"fontFamily":{"body-lg":["Inter"],"label-md":["Space Grotesk"],"headline-xl-mobile":["Space Grotesk"],"display-hero-mobile":["Space Grotesk"],"headline-sm":["Space Grotesk"],"headline-xl":["Space Grotesk"],"headline-lg":["Space Grotesk"],"body-sm":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["Space Grotesk"],"code-telemetry":["Space Grotesk"],"display-hero":["Space Grotesk"],"label-sm":["Space Grotesk"],"body-md":["Inter"]},"fontSize":{"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-hero-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"code-telemetry":["13px",{"lineHeight":"18px","letterSpacing":"-0.01em","fontWeight":"500"}],"display-hero":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low border-r border-outline-variant/30 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="flex flex-col h-full"><div class="h-16 px-space-md flex items-center gap-space-sm border-b border-outline-variant/20 bg-surface-container-lowest/60"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">radar</span></div><div class="flex flex-col"><span class="font-label-md text-label-md tracking-tight text-on-surface uppercase font-bold leading-none">INFRA-GUARD</span><span class="font-code-telemetry text-[10px] text-primary uppercase tracking-widest leading-none mt-1 font-semibold">CivilVision OS</span></div></div><div class="px-space-md py-space-sm border-b border-outline-variant/20 bg-surface-container-low"><div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1"><span>Diagnostic Node</span><span class="flex items-center gap-1 text-primary font-code-telemetry text-[10px]"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>ONLINE</span></div><div class="font-code-telemetry text-code-telemetry text-on-surface font-medium truncate">US-EAST-VA // GIGASTORE-01</div></div><div class="flex-1 overflow-y-auto px-space-sm py-space-md space-y-space-xs"><div class="px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Operational Console</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="structural-review" href="#"><span class="material-symbols-outlined text-[19px]">biotech</span><span>Structural Review Module</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 transition-all bg-primary text-on-primary shadow-sm font-semibold rounded-lg" data-path="building-registry" href="#"><span class="material-symbols-outlined text-[19px]">domain</span><span>Building Registry</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="field-workspace-logs" href="#"><span class="material-symbols-outlined text-[19px]">assignment_turned_in</span><span>Field Workspace &amp; Logs</span></a></nav><div class="pt-space-md px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Procurement &amp; Talent</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="engineering-marketplace" href="#"><span class="material-symbols-outlined text-[19px]">verified_user</span><span>Engineering Marketplace</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="materials-sensor-store" href="#"><span class="material-symbols-outlined text-[19px]">sensors</span><span>Materials &amp; Sensor Store</span></a></nav><div class="pt-space-md px-space-sm pb-1 font-label-sm text-label-sm uppercase tracking-wider text-outline">Governance &amp; Support</div><nav class="space-y-space-xs flex flex-col" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold rounded-lg"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="billing-vip-licenses" href="#"><span class="material-symbols-outlined text-[19px]">workspace_premium</span><span>Billing &amp; VIP Licenses</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="help-ai-assistant" href="#"><span class="material-symbols-outlined text-[19px]">smart_toy</span><span>Help &amp; AI Assistant Hub</span></a></nav></div><div class="p-space-md border-t border-outline-variant/30 bg-surface-container-lowest/80"><div class="flex items-center justify-between p-space-sm rounded-lg bg-surface-container border border-outline-variant/40"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary text-[20px]">memory</span><div class="flex flex-col"><span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Inference Engine</span><span class="font-code-telemetry text-code-telemetry text-on-surface font-semibold">YOLOv9-Crack v4.2</span></div></div><span class="font-code-telemetry text-[11px] text-primary px-1.5 py-0.5 rounded bg-surface-container-highest">99.4%</span></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.02)] z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span><input class="w-full h-9 pl-9 pr-space-md bg-surface-container-lowest border border-outline-variant/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Query asset UUID, bridge stationing, or shear crack telemetry..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>SOC2 TYPE II</span><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span>LEO GNSS 14/14</span><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high border border-outline-variant/40 font-code-telemetry text-[11px] text-on-surface-variant font-medium"><span class="material-symbols-outlined text-[13px] text-secondary">verified</span>PE CERTIFIED</span></div><div class="h-6 w-px bg-outline-variant/40 hidden sm:block"></div><button aria-label="Notifications" class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button><button aria-label="Telemetry Stream" class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[20px]">tune</span></button><div class="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant/30"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-on-surface leading-tight">Dr. Marcus Vance, PE</span><span class="font-code-telemetry text-[10px] text-primary uppercase font-medium">Chief Structural Signoff</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Command Strip / Page Context Overline -->
+<div class="w-full px-space-xl pt-space-lg pb-space-sm bg-surface-container-low flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-space-xs font-code-telemetry text-code-telemetry text-primary uppercase font-bold tracking-wider">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>CivilVision Core // Registry V4.9</span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface-variant font-medium">GIS Grid: WGS84 Universal</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Infrastructure Asset Registry</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Centralized telemetry vault for real-time sensor ingestion, fracture elongation trajectories, and forensic structural signoffs across municipal portfolios.
+      </p>
+</div>
+<!-- Right Quick Actions -->
+<div class="flex items-center gap-space-sm">
+<button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-md hover:shadow-lg active:scale-95" onclick="toggleModal('register-asset-modal')">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Register New Infrastructure Asset</span>
+</button>
+<button class="p-2.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors shadow-sm" title="Export GeoJSON / BIM Registry">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+<!-- Archetype Filter Tabs & Global Search -->
+<div class="w-full px-space-xl py-space-md bg-surface-container-lowest shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Archetype Pills -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" id="archetype-tab-container">
+<button class="archetype-btn active-tab px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-all whitespace-nowrap bg-primary text-on-primary shadow-sm font-semibold" onclick="filterArchetype('all', this)">
+        All Assets (1,248)
+      </button>
+<button class="archetype-btn px-3.5 py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" onclick="filterArchetype('bridges', this)">
+        Bridges &amp; Viaducts (412)
+      </button>
+<button class="archetype-btn px-3.5 py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" onclick="filterArchetype('towers', this)">
+        Commercial Towers (320)
+      </button>
+<button class="archetype-btn px-3.5 py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" onclick="filterArchetype('residential', this)">
+        Residential High-Rises (284)
+      </button>
+<button class="archetype-btn px-3.5 py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" onclick="filterArchetype('dams', this)">
+        Dams &amp; Reservoirs (142)
+      </button>
+<button class="archetype-btn px-3.5 py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all whitespace-nowrap" onclick="filterArchetype('tunnels', this)">
+        Transit Tunnels (90)
+      </button>
+</div>
+<!-- Search & Instant Query Controls -->
+<div class="flex items-center gap-space-sm w-full lg:w-96">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-space-md bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-inner" id="asset-search" oninput="handleInstantSearch(this.value)" placeholder="Filter by asset name, material, or PE signoff..." type="text"/>
+</div>
+<button class="flex items-center gap-1 px-3 py-2 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Specs</span>
+</button>
+</div>
+</div>
+<!-- Analytical Deck: Crack Progression & Degradation Velocity Over Time -->
+<div class="w-full px-space-xl py-space-lg">
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-md p-space-lg relative overflow-hidden">
+<!-- Glow Decorator -->
+<div class="absolute -right-24 -top-24 w-80 h-80 rounded-full bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent blur-3xl pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="px-2 py-0.5 rounded font-code-telemetry text-label-sm bg-primary-fixed text-on-primary-fixed uppercase font-semibold">Time-Series Telemetry Analysis</span>
+<span class="text-outline font-code-telemetry text-label-sm">• Model: Griffith Fracture Strain FEA v8.1</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-1">Crack Progression &amp; Degradation Velocity Over Time</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Fracture elongation tracking (mm/year) correlated with diurnal temperature deltas (ΔT &gt; 35°C) and micro-seismic cycles.</p>
+</div>
+<!-- Material Metadata Badges -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span>HPC C60/75 Concrete</span>
+<span class="font-code-telemetry text-outline text-[10px]">0.18 mm/yr</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span>Post-Tensioned Tendons</span>
+<span class="font-code-telemetry text-outline text-[10px]">0.04 mm/yr</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span>Weathering Steel ASTM A588</span>
+<span class="font-code-telemetry text-outline text-[10px]">0.31 mm/yr</span>
+</div>
+</div>
+</div>
+<!-- Graph & Telemetry Canvas -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg pt-space-xs items-center">
+<!-- Interactive Multi-year SVG Telemetry Graph -->
+<div class="xl:col-span-9 bg-surface-container-low rounded-lg p-space-md">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-space-md font-code-telemetry text-label-sm text-on-surface-variant">
+<span>Y-AXIS: Fracture Elongation Rate (mm/yr)</span>
+<span>X-AXIS: Temporal Baseline 2018 - 2025</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 font-code-telemetry text-label-sm text-error bg-error-container/40 px-2 py-0.5 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+                Seismic Anomaly Spike (2023.4)
+              </span>
+</div>
+</div>
+<!-- Inline Telemetry SVG Graph -->
+<div class="relative w-full h-56">
+<svg class="w-full h-full text-primary" fill="none" preserveaspectratio="none" viewbox="0 0 900 220">
+<defs>
+<lineargradient id="primaryGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#006194" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#006194" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="secondaryGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#316bf3" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#316bf3" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid Horizontal Guides -->
+<line opacity="0.4" stroke="#bfc7d2" stroke-dasharray="3 3" x1="0" x2="900" y1="30" y2="30"></line>
+<line opacity="0.4" stroke="#bfc7d2" stroke-dasharray="3 3" x1="0" x2="900" y1="80" y2="80"></line>
+<line opacity="0.4" stroke="#bfc7d2" stroke-dasharray="3 3" x1="0" x2="900" y1="130" y2="130"></line>
+<line opacity="0.4" stroke="#bfc7d2" stroke-dasharray="3 3" x1="0" x2="900" y1="180" y2="180"></line>
+<!-- Degradation Area Fill: Weathering Steel -->
+<path d="M 0 190 Q 150 170 300 150 T 600 110 T 780 70 L 900 60 L 900 210 L 0 210 Z" fill="url(#primaryGradient)"></path>
+<!-- Trajectory 1: HPC Concrete (Teal/Blue) -->
+<path d="M 0 185 C 140 175, 280 160, 420 150 C 560 140, 700 120, 900 95" stroke="#006194" stroke-linecap="round" stroke-width="3"></path>
+<!-- Trajectory 2: Post-Tensioned Tendons (Purple/Blue - Nominal Slow) -->
+<path d="M 0 200 C 180 195, 360 190, 540 185 C 720 180, 810 170, 900 165" stroke="#316bf3" stroke-dasharray="4 4" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Trajectory 3: Weathering Steel (High Acceleration) -->
+<path d="M 0 160 C 130 140, 270 125, 410 100 C 550 75, 680 85, 750 40 L 900 30" stroke="#ba1a1a" stroke-linecap="round" stroke-width="2"></path>
+<!-- Seismic Shockwave Event Vertical Pin -->
+<line stroke="#ba1a1a" stroke-dasharray="2 2" stroke-width="1.5" x1="680" x2="680" y1="10" y2="210"></line>
+<circle cx="680" cy="48" fill="#ba1a1a" r="4.5"></circle>
+<circle cx="410" cy="100" fill="#006194" r="3.5"></circle>
+<circle cx="900" cy="95" fill="#006194" r="4"></circle>
+<circle cx="900" cy="165" fill="#316bf3" r="4"></circle>
+</svg>
+<!-- Time markers -->
+<div class="flex justify-between font-code-telemetry text-[11px] text-outline pt-2 px-1">
+<span>JAN 2019</span>
+<span>JAN 2020</span>
+<span>JAN 2021</span>
+<span>JAN 2022</span>
+<span>JAN 2023 (M4.8 EQ)</span>
+<span>JAN 2024</span>
+<span>OCT 2025 (PROJ)</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Summary Metric Bento Cards -->
+<div class="xl:col-span-3 flex flex-col gap-space-sm h-full justify-between">
+<div class="p-space-md rounded-lg bg-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Mean Portfolio Velocity</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">0.142</span>
+<span class="font-code-telemetry text-body-sm text-outline">mm / yr</span>
+</div>
+<div class="flex items-center gap-1.5 mt-2 font-code-telemetry text-[11px] text-primary">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+<span>-8.4% vs 10-Yr Historical Norm</span>
+</div>
+</div>
+<div class="p-space-md rounded-lg bg-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Active Fiber Strain Gages</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">14,892</span>
+<span class="font-code-telemetry text-body-sm text-primary">ONLINE</span>
+</div>
+<div class="flex items-center gap-1.5 mt-2 font-code-telemetry text-[11px] text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>99.98% Fiber Bragg Grating fidelity</span>
+</div>
+</div>
+<div class="p-space-md rounded-lg bg-error-container/30">
+<span class="font-label-sm text-label-sm text-error uppercase font-semibold">Shear Alert Thresholds</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg text-headline-lg text-error font-bold">3 Assets</span>
+<span class="font-code-telemetry text-body-sm text-error">&gt; 0.28 mm/yr</span>
+</div>
+<div class="flex items-center gap-1.5 mt-2 font-code-telemetry text-[11px] text-on-error-container">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span>Mandatory PE Re-inspection booked</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Asset Directory Deck Header -->
+<div class="w-full px-space-xl pb-space-sm flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Registered Infrastructure Assets</h3>
+<span class="px-2 py-0.5 rounded font-code-telemetry text-label-sm bg-surface-container-highest text-on-surface font-bold" id="asset-count-badge">4 Selected Profile Sets</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<span>Sort by:</span>
+<select class="bg-surface-container-low text-on-surface rounded-lg px-2.5 py-1 text-label-sm font-label-sm focus:outline-none focus:ring-1 focus:ring-primary">
+<option>Structural Health Index (Lowest First)</option>
+<option>Inspection Recency</option>
+<option>Active Sensor Node Density</option>
+<option>Asset Replacement Valuation</option>
+</select>
+</div>
+</div>
+<!-- Rich Asset Directory Cards Grid -->
+<div class="w-full px-space-xl pb-space-xl grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-space-lg" id="asset-grid">
+<!-- CARD 1: Golden Gate Bridge Viaduct Bent -->
+<div class="asset-card flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200" data-archetype="bridges">
+<!-- Media Header with Telemetry Overlay -->
+<div class="relative h-56 w-full overflow-hidden bg-surface-container-high">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 hover:scale-105" data-alt="Architectural technical inspection photograph of a massive concrete bridge bent pier and steel truss connection at the Golden Gate Bridge approach in San Francisco, clear coastal lighting with cold blue atmospheric mist, micro-crack diagnostic scanning grid overlay and strain sensors installed." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCvAfmjeCzmjGatJC1hlNuo_mfBTlfXyfFaI10GfhQ-TEO9A01KZhqBqt36bZ1MTZSbzHiWJtPnDlSuDS8izMYdrmo_njsHU7K7Q-HEskG4hAxdqCaLntLUwebR1Xxs1eZ0cTZvZjMIddgB63Uc0CpFcr0UMo-7_oa42HwatdEI5CIrRlgufffzs7KmZTkpuDf6Gi9xxCHTOIgtx3ZCaPdr6HWIgI5H7I6o4Pw_ieJG')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent"></div>
+<!-- Live Status Pill Top Right -->
+<div class="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md font-code-telemetry text-label-sm text-primary font-bold shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>94.2% SHI // NOMINAL</span>
+</div>
+<!-- Archetype Tag Top Left -->
+<div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-inverse-surface/80 backdrop-blur-md font-label-sm text-[11px] text-inverse-on-surface tracking-wider uppercase font-semibold">
+          Viaduct Bent Pier 4-B
+        </div>
+<!-- Title On Scrim -->
+<div class="absolute bottom-3 left-4 right-4">
+<h4 class="font-headline-sm text-headline-sm text-on-primary font-bold drop-shadow">Golden Gate Bridge Viaduct Bent</h4>
+<span class="font-code-telemetry text-[11px] text-surface-container-high">UUID: GGB-SF-V4B-8831 // Caltrans District 4</span>
+</div>
+</div>
+<!-- Card Body: Structural Metadata Grid -->
+<div class="p-space-md flex-1 flex flex-col justify-between space-y-space-md">
+<div class="grid grid-cols-3 gap-space-sm pt-1">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Material DNA</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">HPC C60/75</span>
+<span class="text-[10px] text-outline block">Silica Fume Enriched</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Strain Node Grid</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-primary">128 Sensors</span>
+<span class="text-[10px] text-outline block">Triaxial FBG Telemetry</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Signoff PE</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">Dr. Vance, PE</span>
+<span class="text-[10px] text-outline block">CA #C78190</span>
+</div>
+</div>
+<!-- Timeline / Health Progress Bar -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Fatigue Life Remaining</span>
+<span class="font-code-telemetry font-bold text-primary">74.6 Years (Nominal)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 88%;"></div>
+</div>
+<div class="flex justify-between font-code-telemetry text-[10px] text-outline pt-0.5">
+<span>Last LiDAR: 18 hrs ago</span>
+<span>Next Mandated Review: 12 Nov 2025</span>
+</div>
+</div>
+<!-- Action Drawer Buttons -->
+<div class="pt-space-xs flex items-center justify-between gap-space-xs">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="openDrawer('Golden Gate Bridge Viaduct Bent', 'GGB-SF-V4B-8831', 'HPC C60/75 with Microsilica Admixture', '94.2%', '128 FBG Triaxial Nodes', '0.042 mm/yr (Extremely Low)')">
+<span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+<span>Material DNA</span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="runSimulation('GGB-SF-V4B-8831')">
+<span class="material-symbols-outlined text-[16px] text-secondary">model_training</span>
+<span>FEA Simulation</span>
+</button>
+<button class="py-2 px-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center gap-1 transition-colors" onclick="viewTelemetry('GGB-SF-V4B-8831')" title="Inspect Active Telemetry">
+<span class="material-symbols-outlined text-[16px]">sensors</span>
+<span class="hidden sm:inline">Telemetry</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 2: Trans-Bay Tube Underwater Shell -->
+<div class="asset-card flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200" data-archetype="tunnels">
+<!-- Media Header with Telemetry Overlay -->
+<div class="relative h-56 w-full overflow-hidden bg-surface-container-high">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 hover:scale-105" data-alt="Technical industrial photograph inside the deep underwater transit tube tunnel shell beneath the San Francisco Bay, showing curved reinforced seismic structural joints, damp zinc galvanic anodes, hydrostatic monitoring arrays with amber diagnostic marker lights." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMFiHTfXfsnweWpuEDcZnw6_hMKgvllwUar2UuEMwsf-2f7zfOUauRPMTZHqzNd1IfQ5nE-XopyKX1nfw9ww__XmVoL9LTCSq1tJgRoUouoDGNR2kBHCAVfFThJsz_uMqdbllx4RXtSdTpWn-ZaZkTvqgMl8Wu45hrtHExHSeaT5oP0dAwzQjApYJ4aKCXZ1qTejp-fJ6UWNIfIrVR2mI3bYfHfSqeW_CSFEr70giV')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent"></div>
+<!-- Live Status Pill Top Right -->
+<div class="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md font-code-telemetry text-label-sm text-error font-bold shadow-sm">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+<span>72.8% SHI // ACTIVE MONITORING</span>
+</div>
+<!-- Archetype Tag Top Left -->
+<div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-inverse-surface/80 backdrop-blur-md font-label-sm text-[11px] text-inverse-on-surface tracking-wider uppercase font-semibold">
+          Underwater Sub-Sea Section 12-W
+        </div>
+<!-- Title On Scrim -->
+<div class="absolute bottom-3 left-4 right-4">
+<h4 class="font-headline-sm text-headline-sm text-on-primary font-bold drop-shadow">Trans-Bay Tube Underwater Shell</h4>
+<span class="font-code-telemetry text-[11px] text-surface-container-high">UUID: BART-TBT-CA-4091 // Bay Area Rapid Transit</span>
+</div>
+</div>
+<!-- Card Body: Structural Metadata Grid -->
+<div class="p-space-md flex-1 flex flex-col justify-between space-y-space-md">
+<div class="grid grid-cols-3 gap-space-sm pt-1">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Material DNA</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">ASTM A588 + HPC</span>
+<span class="text-[10px] text-error block">Micro-Fissure Alert</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Strain Node Grid</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-primary">342 Sensors</span>
+<span class="text-[10px] text-outline block">Hydrostatic Differential</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Signoff PE</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">Elena Rostova, PE</span>
+<span class="text-[10px] text-outline block">CA #C91004</span>
+</div>
+</div>
+<!-- Timeline / Health Progress Bar -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-error font-semibold">Hydrostatic Flexure Index</span>
+<span class="font-code-telemetry font-bold text-error">Velocity: 0.29 mm/yr (Elevated)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-error" style="width: 72%;"></div>
+</div>
+<div class="flex justify-between font-code-telemetry text-[10px] text-outline pt-0.5">
+<span>Last Ultrasonic Scan: 42 mins ago</span>
+<span>Critical Inspection: Overdue by 4 days</span>
+</div>
+</div>
+<!-- Action Drawer Buttons -->
+<div class="pt-space-xs flex items-center justify-between gap-space-xs">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="openDrawer('Trans-Bay Tube Underwater Shell', 'BART-TBT-CA-4091', 'ASTM A588 Weathering Steel Shell with Inner High-Strength Shotcrete Lining', '72.8%', '342 Hydrostatic Pressure &amp; Inclinometer Pods', '0.291 mm/yr (Exceeds 0.20 mm/yr Limit)')">
+<span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+<span>Material DNA</span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="runSimulation('BART-TBT-CA-4091')">
+<span class="material-symbols-outlined text-[16px] text-secondary">model_training</span>
+<span>FEA Simulation</span>
+</button>
+<button class="py-2 px-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center gap-1 transition-colors" onclick="viewTelemetry('BART-TBT-CA-4091')" title="Inspect Active Telemetry">
+<span class="material-symbols-outlined text-[16px]">sensors</span>
+<span class="hidden sm:inline">Telemetry</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 3: Salesforce Transit Terminal Truss -->
+<div class="asset-card flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200" data-archetype="towers">
+<!-- Media Header with Telemetry Overlay -->
+<div class="relative h-56 w-full overflow-hidden bg-surface-container-high">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 hover:scale-105" data-alt="Architectural civil engineering photograph of the massive white structural steel diagrid truss and bus deck steel box girders of the Salesforce Transit Center in downtown San Francisco, daylight illumination highlighting metallic joints and acoustic emission sensor tags." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA527atulfElR7VtdjqSBFHlAc71WzYl9XTxt6PB8DX8L1FLdkBI0TS6C5TVj-i2OiAXlENVsQcOU4oU3ItaUIewgPMyDOIVS2qSU8MJgKiodDEJJZ44ELGlXqjt06YeyI6ioK7ZJV1Uj3pk82xQcCpMluKTwM7sJQLLC-tX4R_bjAaEl2Sc2l0MKtZYTol0MDlk6C8tJCkDz1WjvywWn6dSC5XBVIoLFzYAt1Drwqg')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent"></div>
+<!-- Live Status Pill Top Right -->
+<div class="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md font-code-telemetry text-label-sm text-primary font-bold shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>98.1% SHI // NOMINAL</span>
+</div>
+<!-- Archetype Tag Top Left -->
+<div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-inverse-surface/80 backdrop-blur-md font-label-sm text-[11px] text-inverse-on-surface tracking-wider uppercase font-semibold">
+          Central Bus Deck Diagrid Truss
+        </div>
+<!-- Title On Scrim -->
+<div class="absolute bottom-3 left-4 right-4">
+<h4 class="font-headline-sm text-headline-sm text-on-primary font-bold drop-shadow">Salesforce Transit Terminal Truss</h4>
+<span class="font-code-telemetry text-[11px] text-surface-container-high">UUID: SF-TTC-TRUSS-012 // TJPA Joint Powers</span>
+</div>
+</div>
+<!-- Card Body: Structural Metadata Grid -->
+<div class="p-space-md flex-1 flex flex-col justify-between space-y-space-md">
+<div class="grid grid-cols-3 gap-space-sm pt-1">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Material DNA</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">A709 Grade 50</span>
+<span class="text-[10px] text-outline block">Quenched/Tempered Plate</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Strain Node Grid</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-primary">84 Sensors</span>
+<span class="text-[10px] text-outline block">Acoustic Emission Gages</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Signoff PE</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">Marcus Vance, PE</span>
+<span class="text-[10px] text-outline block">CA #C78190</span>
+</div>
+</div>
+<!-- Timeline / Health Progress Bar -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Cyclic Thermal Tolerance</span>
+<span class="font-code-telemetry font-bold text-primary">Nominal Load Distribution (38 kN)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 98%;"></div>
+</div>
+<div class="flex justify-between font-code-telemetry text-[10px] text-outline pt-0.5">
+<span>Last Acoustic Scan: 3 hrs ago</span>
+<span>Zero Fracture Anomalies Tagged</span>
+</div>
+</div>
+<!-- Action Drawer Buttons -->
+<div class="pt-space-xs flex items-center justify-between gap-space-xs">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="openDrawer('Salesforce Transit Terminal Truss', 'SF-TTC-TRUSS-012', 'Heavy ASTM A709 Grade 50 Steel with Bolted Splice Retrofits', '98.1%', '84 Multi-channel Acoustic Piezo Sensors', '0.011 mm/yr (Zero Creep)')">
+<span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+<span>Material DNA</span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="runSimulation('SF-TTC-TRUSS-012')">
+<span class="material-symbols-outlined text-[16px] text-secondary">model_training</span>
+<span>FEA Simulation</span>
+</button>
+<button class="py-2 px-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center gap-1 transition-colors" onclick="viewTelemetry('SF-TTC-TRUSS-012')" title="Inspect Active Telemetry">
+<span class="material-symbols-outlined text-[16px]">sensors</span>
+<span class="hidden sm:inline">Telemetry</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CARD 4: Shasta Dam Spillway Gate 4 -->
+<div class="asset-card flex flex-col bg-surface-container-lowest rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-200" data-archetype="dams">
+<!-- Media Header with Telemetry Overlay -->
+<div class="relative h-56 w-full overflow-hidden bg-surface-container-high">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 hover:scale-105" data-alt="Dramatic aerial technical photograph of the monolithic concrete spillway crest and radial steel gate at Shasta Dam in Northern California, roaring water spray in the distance, high-angle sunlight glinting off hydraulic trunnion bearings and embedded wireless tiltmeter nodes." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnfNNwbhZVkpt9nyF5sJIZ-Jw_esVWb94q2szbYf7HcvbVpfOFdBLE1jaxbCYnYteW30hMquP2enrgpN2LYPXY8tVfUxzsyYK4aAP1Mut_gRH1mgufgXGPyo1j1V0yufvaKHQPeirSHOknaZmerYhjqZIG2-sZ_FYJrYdHkmtON2etSfF5sGBWDDL2f3Uk-HbPfn2Si-qv9fpc1WV94d18yKXs1vwCNePPLGNjX0xT')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent"></div>
+<!-- Live Status Pill Top Right -->
+<div class="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md font-code-telemetry text-label-sm text-on-surface font-bold shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span>87.4% SHI // STABLE ELEVATION</span>
+</div>
+<!-- Archetype Tag Top Left -->
+<div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-inverse-surface/80 backdrop-blur-md font-label-sm text-[11px] text-inverse-on-surface tracking-wider uppercase font-semibold">
+          Radial Spillway Pier &amp; Gate 4
+        </div>
+<!-- Title On Scrim -->
+<div class="absolute bottom-3 left-4 right-4">
+<h4 class="font-headline-sm text-headline-sm text-on-primary font-bold drop-shadow">Shasta Dam Spillway Gate 4</h4>
+<span class="font-code-telemetry text-[11px] text-surface-container-high">UUID: USBR-SHAS-SP4-1945 // US Bureau of Reclamation</span>
+</div>
+</div>
+<!-- Card Body: Structural Metadata Grid -->
+<div class="p-space-md flex-1 flex flex-col justify-between space-y-space-md">
+<div class="grid grid-cols-3 gap-space-sm pt-1">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Material DNA</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">Mass Concrete 4500</span>
+<span class="text-[10px] text-outline block">Pozzolan Blend</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Strain Node Grid</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-primary">216 Sensors</span>
+<span class="text-[10px] text-outline block">Hydro-Piezometer Array</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase block">Signoff PE</span>
+<span class="font-code-telemetry text-code-telemetry font-bold text-on-surface">K. MacIntyre, PE</span>
+<span class="text-[10px] text-outline block">USBR #FED-884</span>
+</div>
+</div>
+<!-- Timeline / Health Progress Bar -->
+<div class="space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Trunnion Bearing Friction Rating</span>
+<span class="font-code-telemetry font-bold text-primary">Marginal Wear (Cycle 14,200)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-secondary-container" style="width: 87%;"></div>
+</div>
+<div class="flex justify-between font-code-telemetry text-[10px] text-outline pt-0.5">
+<span>Last Drone Photogrammetry: Yesterday</span>
+<span>Alkali-Silica Reaction: Sub-critical</span>
+</div>
+</div>
+<!-- Action Drawer Buttons -->
+<div class="pt-space-xs flex items-center justify-between gap-space-xs">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="openDrawer('Shasta Dam Spillway Gate 4', 'USBR-SHAS-SP4-1945', 'Unreinforced Mass Concrete Matrix with Post-Placed Low-Heat Portland Pozzolan', '87.4%', '216 Vibrating Wire Piezometers &amp; Tiltmeters', '0.088 mm/yr (Standard Hydrological Swell)')">
+<span class="material-symbols-outlined text-[16px] text-primary">biotech</span>
+<span>Material DNA</span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-colors" onclick="runSimulation('USBR-SHAS-SP4-1945')">
+<span class="material-symbols-outlined text-[16px] text-secondary">model_training</span>
+<span>FEA Simulation</span>
+</button>
+<button class="py-2 px-3 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center justify-center gap-1 transition-colors" onclick="viewTelemetry('USBR-SHAS-SP4-1945')" title="Inspect Active Telemetry">
+<span class="material-symbols-outlined text-[16px]">sensors</span>
+<span class="hidden sm:inline">Telemetry</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Forensic Action Drawer / Flyout (Slide-over Modal) -->
+<div class="fixed inset-0 z-50 pointer-events-none flex justify-end opacity-0 transition-opacity duration-300" id="material-dna-drawer">
+<!-- Backdrop Overlay -->
+<div class="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm pointer-events-auto" onclick="closeDrawer()"></div>
+<!-- Drawer Surface -->
+<div class="relative w-full max-w-xl h-full bg-surface-container-lowest shadow-2xl p-space-lg flex flex-col justify-between overflow-y-auto pointer-events-auto transform translate-x-full transition-transform duration-300 ease-in-out" id="drawer-panel">
+<div class="space-y-space-md">
+<!-- Drawer Header -->
+<div class="flex items-start justify-between pb-space-sm border-b border-outline-variant/30">
+<div>
+<span class="font-code-telemetry text-label-sm text-primary uppercase font-bold tracking-widest block">Structural DNA Diagnostic Profile</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1" id="drawer-asset-title">Asset Inspection</h3>
+<span class="font-code-telemetry text-body-sm text-outline" id="drawer-asset-uuid">UUID: 000-000-000</span>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors" onclick="closeDrawer()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Quick Telemetry HUD Block -->
+<div class="p-space-md rounded-xl bg-surface-container-low grid grid-cols-2 gap-space-sm">
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Current SHI Score</span>
+<div class="font-headline-md text-headline-md text-primary font-bold" id="drawer-asset-shi">--</div>
+</div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase">Elongation Velocity</span>
+<div class="font-code-telemetry text-body-md text-on-surface font-bold mt-1" id="drawer-asset-velocity">--</div>
+</div>
+</div>
+<!-- Detailed Material Matrix Composition -->
+<div class="space-y-space-xs">
+<h4 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Material Substrate &amp; Specification</h4>
+<div class="p-space-md rounded-lg bg-surface-container-lowest border border-outline-variant/40 space-y-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">architecture</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="drawer-asset-mat">High-Performance Mix</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Compressive design strength: 75 MPa @ 56 days. Maximum aggregate diameter 19mm. Low water-to-cement ratio (0.28) with crystalline waterproofing additive to inhibit chloride intrusion and alkali reactivity.
+            </p>
+</div>
+</div>
+<!-- Embedded Sensor Nodes Telemetry List -->
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between">
+<h4 class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">Assigned Telemetry Bus</h4>
+<span class="font-code-telemetry text-[11px] text-primary" id="drawer-asset-sensors">Sensors</span>
+</div>
+<div class="space-y-1.5 font-code-telemetry text-[12px]">
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-low">
+<span class="text-on-surface font-medium">FBG-01 Strain Gage (North Footing)</span>
+<span class="text-primary font-bold">142.3 με (Nominal)</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-low">
+<span class="text-on-surface font-medium">TILT-04 Inclinometer (Pier Centerline)</span>
+<span class="text-primary font-bold">0.012° Deflection</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-low">
+<span class="text-on-surface font-medium">CORR-02 Rebar Galvanic Sensor</span>
+<span class="text-secondary font-bold">-180 mV SCE</span>
+</div>
+</div>
+</div>
+<!-- AI Fracture Progression Simulation Preview -->
+<div class="p-space-md rounded-xl bg-surface-container-highest/60 space-y-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">psychology</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">CivilVision Fracture Predictive Model</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Under 95th percentile projected thermal cycles through 2035, micro-shear cracking along the tensile flange is forecasted to remain within AASHTO LRFD allowable fatigue thresholds.
+          </p>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="pt-space-md border-t border-outline-variant/30 flex items-center gap-space-sm">
+<button class="flex-1 py-2.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" onclick="closeDrawer()">
+          Close Inspector
+        </button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-md" onclick="alert('Forensic engineering certification stamp PDF generated and dispatched to the State DOT archives.')">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Generate PE Dossier</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Register New Infrastructure Asset Modal Dialog -->
+<div class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center opacity-0 transition-opacity duration-200" id="register-asset-modal">
+<div class="absolute inset-0 bg-inverse-surface/50 backdrop-blur-sm pointer-events-auto" onclick="toggleModal('register-asset-modal')"></div>
+<div class="relative w-full max-w-2xl bg-surface-container-lowest rounded-xl shadow-2xl p-space-lg pointer-events-auto space-y-space-md transform scale-95 transition-transform duration-200" id="register-modal-content">
+<div class="flex items-start justify-between border-b border-outline-variant/30 pb-space-sm">
+<div>
+<span class="font-code-telemetry text-label-sm text-primary uppercase font-bold">Civil Asset Ingestion Wizard</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-0.5">Register New Infrastructure Node</h3>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg" onclick="toggleModal('register-asset-modal')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="space-y-space-md" onsubmit="handleNewAsset(event)">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Asset Designation Name</label>
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Richmond-San Rafael Pier 19" required="" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Structural Archetype</label>
+<select class="w-full h-9 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+<option>Bridges &amp; Viaducts</option>
+<option>Commercial Towers</option>
+<option>Residential High-Rises</option>
+<option>Dams &amp; Reservoirs</option>
+<option>Transit Tunnels</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Material DNA Formulation</label>
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. HPC C70 Self-Consolidating" required="" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Assigned Professional Engineer (PE)</label>
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Dr. Vance, PE (CA #C78190)" required="" type="text"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Telemetry Node Configuration (UUIDs or Broker URL)</label>
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" placeholder="mqtt://sensors.dot.ca.gov/bridge-8831/fbg-stream" type="text"/>
+</div>
+<div class="pt-space-sm flex justify-end gap-space-sm border-t border-outline-variant/30">
+<button class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" onclick="toggleModal('register-asset-modal')" type="button">
+            Cancel
+          </button>
+<button class="px-space-md py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-md" type="submit">
+            Save &amp; Initialize Sensor Mesh
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Inline Micro-Interaction Script -->
+<script>
+    function filterArchetype(type, btnEl) {
+      // Manage tab state
+      document.querySelectorAll('.archetype-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm', 'font-semibold');
+        btn.classList.add('text-on-surface-variant');
+      });
+      btnEl.classList.remove('text-on-surface-variant');
+      btnEl.classList.add('bg-primary', 'text-on-primary', 'shadow-sm', 'font-semibold');
+
+      // Filter cards
+      const cards = document.querySelectorAll('.asset-card');
+      let visibleCount = 0;
+      cards.forEach(card => {
+        if (type === 'all' || card.getAttribute('data-archetype') === type) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      document.getElementById('asset-count-badge').textContent = visibleCount + ' Matching Profiles';
+    }
+
+    function handleInstantSearch(query) {
+      const q = query.toLowerCase().trim();
+      const cards = document.querySelectorAll('.asset-card');
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(q)) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      document.getElementById('asset-count-badge').textContent = visibleCount + ' Matching Profiles';
+    }
+
+    function openDrawer(title, uuid, material, shi, sensors, velocity) {
+      document.getElementById('drawer-asset-title').textContent = title;
+      document.getElementById('drawer-asset-uuid').textContent = 'UUID: ' + uuid;
+      document.getElementById('drawer-asset-mat').textContent = material;
+      document.getElementById('drawer-asset-shi').textContent = shi;
+      document.getElementById('drawer-asset-sensors').textContent = sensors;
+      document.getElementById('drawer-asset-velocity').textContent = velocity;
+
+      const drawer = document.getElementById('material-dna-drawer');
+      const panel = document.getElementById('drawer-panel');
+      drawer.classList.remove('opacity-0', 'pointer-events-none');
+      panel.classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      const drawer = document.getElementById('material-dna-drawer');
+      const panel = document.getElementById('drawer-panel');
+      panel.classList.add('translate-x-full');
+      setTimeout(() => {
+        drawer.classList.add('opacity-0', 'pointer-events-none');
+      }, 200);
+    }
+
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById('register-modal-content');
+      if (modal.classList.contains('opacity-0')) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        content.classList.remove('scale-95');
+      } else {
+        content.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+        }, 150);
+      }
+    }
+
+    function runSimulation(uuid) {
+      alert('Executing non-linear Finite Element Crack Propagation solver on asset [' + uuid + '] via GPU compute cluster node US-EAST-02.');
+    }
+
+    function viewTelemetry(uuid) {
+      alert('Routing live 500Hz high-frequency piezoelectric sensor packet stream for [' + uuid + '].');
+    }
+
+    function handleNewAsset(e) {
+      e.preventDefault();
+      alert('New civil infrastructure node successfully calibrated and added to the CivilVision Ledger.');
+      toggleModal('register-asset-modal');
+    }
+  </script>
+</div></main></div></body></html>

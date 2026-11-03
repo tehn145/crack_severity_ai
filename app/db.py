@@ -56,6 +56,9 @@ def init_db() -> None:
                 conf          REAL,
                 x1 REAL, y1 REAL, x2 REAL, y2 REAL,
                 length_px REAL, width_px REAL, area_px REAL, angle_deg REAL,
+                width_max_px  REAL,
+                branching     INTEGER DEFAULT 0,
+                multi_plane   INTEGER DEFAULT 0,
                 severity      TEXT DEFAULT NULL   -- Phase 2 điền sau
             );
             """
@@ -72,6 +75,15 @@ def init_db() -> None:
         ):
             if col not in cols:
                 c.execute(f"ALTER TABLE inspections ADD COLUMN {col} {typ}")
+        dcols = {r[1] for r in c.execute("PRAGMA table_info(detections)")}
+        for col, typ in (
+            ("width_max_px", "REAL"),
+            ("branching", "INTEGER DEFAULT 0"),
+            ("multi_plane", "INTEGER DEFAULT 0"),
+            ("contrast_ratio", "REAL"),
+        ):
+            if col not in dcols:
+                c.execute(f"ALTER TABLE detections ADD COLUMN {col} {typ}")
         if c.execute("SELECT COUNT(*) FROM projects").fetchone()[0] == 0:
             c.execute(
                 "INSERT INTO projects (name, address, n_floors, created_at)"
@@ -122,10 +134,16 @@ def save_inspection(
             )
             c.execute(
                 "INSERT INTO detections (inspection_id, conf, x1, y1, x2, y2,"
-                " length_px, width_px, area_px, angle_deg, severity) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                " length_px, width_px, area_px, angle_deg, width_max_px,"
+                " branching, multi_plane, contrast_ratio, severity)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     ins_id, d.get("conf"), b[0], b[1], b[2], b[3],
                     d.get("length_px"), d.get("width_px"), d.get("area_px"), d.get("angle_deg"),
+                    d.get("width_max_px"),
+                    1 if d.get("branching") else 0,
+                    1 if d.get("multi_plane") else 0,
+                    d.get("contrast_ratio"),
                     severity_label,
                 ),
             )
@@ -171,6 +189,33 @@ def set_status(ins_id: int, status: str, by: str) -> dict | None:
                 "UPDATE inspections SET status=?, approved_by=NULL, approved_at=NULL WHERE id=?",
                 (status, ins_id),
             )
+    return get_inspection(ins_id)
+
+
+def reclassify_inspection(
+    ins_id: int,
+    gsd_mm_per_px: float,
+    through_flags: list[bool],
+    label_for: callable,
+) -> dict | None:
+    """Phase 2 hoàn chỉnh: phân loại lại hồ sơ ĐÃ LƯU từ đặc trưng px trong DB.
+
+    label_for(detection_row, through: bool) -> nhãn severity (từ app.severity.classify).
+    Cập nhật cả gsd của hồ sơ. Trả về hồ sơ mới nhất.
+    """
+    init_db()
+    ins = get_inspection(ins_id)
+    if ins is None:
+        return None
+    with _conn() as c:
+        for i, d in enumerate(ins["detections"]):
+            sev = label_for(d, bool(through_flags[i]) if i < len(through_flags) else False)
+            c.execute(
+                "UPDATE detections SET severity=? WHERE id=?", (sev, d["id"])
+            )
+        c.execute(
+            "UPDATE inspections SET gsd_mm_per_px=? WHERE id=?", (gsd_mm_per_px, ins_id)
+        )
     return get_inspection(ins_id)
 
 

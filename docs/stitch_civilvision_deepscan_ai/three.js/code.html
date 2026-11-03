@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<!-- STITCH_THREEJS_START:ANIMATION_16 class="fixed inset-0 w-full h-full bg-transparent" -->
+<div class="fixed inset-0 w-full h-full bg-transparent" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_16" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_16');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Three.js interactive 3D grid of continuous tiles waving and rippling in fluid motion
+const container = document.getElementById('threejs-container');
+const width = container ? (container.clientWidth || window.innerWidth) : window.innerWidth;
+const height = container ? (container.clientHeight || window.innerHeight) : window.innerHeight;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+camera.position.set(0, 32, 42);
+camera.lookAt(0, -2, 0);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+if (container) {
+  container.appendChild(renderer.domElement);
+}
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0x0284c7, 1.8);
+dirLight.position.set(20, 40, 20);
+scene.add(dirLight);
+
+const blueLight = new THREE.PointLight(0x00d2ff, 2.5, 80);
+blueLight.position.set(-15, 10, -10);
+scene.add(blueLight);
+
+const purpleLight = new THREE.PointLight(0x38bdf8, 1.8, 60);
+purpleLight.position.set(15, 15, 10);
+scene.add(purpleLight);
+
+// Interactive 3D Grid of continuous waving tiles (InstancedMesh)
+const rows = 42;
+const cols = 56;
+const count = rows * cols;
+const tileSize = 0.92;
+const tileHeight = 0.35;
+
+const geometry = new THREE.BoxGeometry(tileSize, tileHeight, tileSize);
+// Chamfered edges feel using normal / phong
+const material = new THREE.MeshPhongMaterial({
+  color: 0x0f2238,
+  emissive: 0x03182b,
+  specular: 0x38bdf8,
+  shininess: 90,
+  flatShading: false
+});
+
+const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(instancedMesh);
+
+const dummy = new THREE.Object3D();
+const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+const raycaster = new THREE.Raycaster();
+const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const hitPoint = new THREE.Vector3();
+
+window.addEventListener('mousemove', (e) => {
+  const normX = (e.clientX / window.innerWidth) * 2 - 1;
+  const normY = -(e.clientY / window.innerHeight) * 2 + 1;
+  mouse.targetX = normX * 18;
+  mouse.targetY = -normY * 14;
+});
+
+window.addEventListener('resize', () => {
+  if (!container) return;
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+let clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const time = clock.getElapsedTime() * 1.6;
+
+  mouse.x += (mouse.targetX - mouse.x) * 0.08;
+  mouse.y += (mouse.targetY - mouse.y) * 0.08;
+
+  let idx = 0;
+  const halfCols = (cols * 1.1) / 2;
+  const halfRows = (rows * 1.1) / 2;
+
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const x = (i * 1.1) - halfCols;
+      const z = (j * 1.1) - halfRows;
+
+      // Distance from mouse pointer
+      const dx = x - mouse.x;
+      const dz = z - mouse.y;
+      const distMouse = Math.sqrt(dx * dx + dz * dz);
+      const mouseWave = Math.sin(Math.max(0, 10 - distMouse) * 0.8) * Math.exp(-distMouse * 0.15) * 2.2;
+
+      // Complex fluid ripple calculation
+      const wave1 = Math.sin(x * 0.28 + time * 1.2) * 1.1;
+      const wave2 = Math.cos(z * 0.32 + time * 0.9) * 0.9;
+      const wave3 = Math.sin((x + z) * 0.18 + time * 1.5) * 0.6;
+      const radialWave = Math.sin(Math.sqrt(x * x + z * z) * 0.35 - time * 1.4) * 0.8;
+
+      const y = wave1 + wave2 + wave3 + radialWave + mouseWave;
+
+      dummy.position.set(x, y - 4, z);
+      // Slight tilt aligning with ripple wave slope
+      dummy.rotation.x = Math.sin(z * 0.2 + time) * 0.12;
+      dummy.rotation.z = Math.cos(x * 0.2 + time) * 0.12;
+
+      // Scale height based on wave elevation for dynamic extrusion
+      const sY = Math.max(0.6, 1.0 + y * 0.25);
+      dummy.scale.set(1.0, sY, 1.0);
+
+      dummy.updateMatrix();
+      instancedMesh.setMatrixAt(idx++, dummy.matrix);
+    }
+  }
+
+  instancedMesh.instanceMatrix.needsUpdate = true;
+  renderer.render(scene, camera);
+}
+animate();
+
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_16 -->
+</body>
+</html>

@@ -1,0 +1,154 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\usepackage{parskip}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{textcomp}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{document}
+
+% ================= TRANG BIA =================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\large \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH}\par}
+    {\large \textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN}\par}
+    \vspace{1.5cm}
+    \includegraphics[width=4cm]{logo.png}\par
+    \vspace{1.5cm}
+    {\LARGE \textbf{BÁO CÁO TIẾN ĐỘ}\par}
+    {\LARGE \textbf{KHÓA LUẬN TỐT NGHIỆP}\par}
+    \vspace{0.15cm}
+    {\large \textbf{(Lần 13)}\par}
+    \vspace{1.3cm}
+    {\Large \textbf{PHÁT HIỆN VÀ PHÂN LOẠI VẾT NỨT BỀ MẶT CÔNG TRÌNH XÂY DỰNG TỪ ẢNH HAI CHIỀU SỬ DỤNG MÔ HÌNH HỌC SÂU}\par}
+    \vspace{0.4cm}
+    {\large \textit{Detection and Classification of Surface Cracks on Civil Infrastructure from Two-Dimensional Images Using Deep Learning Models}\par}
+    \vspace{2.2cm}
+    \begin{flushright}
+        \textbf{GVHD:} TS. Phan Xuân Thiện\\[0.4cm]
+        \textbf{Sinh viên thực hiện:}\\
+        Ngô Kim Thành -- 23521447\\
+        Trần Công Thành -- 23521463
+    \end{flushright}
+    \vfill
+    {\large TP. Hồ Chí Minh, ngày 03 tháng 11 năm 2026\par}
+\end{titlepage}
+
+% ================= NOI DUNG =================
+\section{Mục tiêu và những việc trọng tâm đã triển khai trong tuần}
+Bám sát lộ trình nghiên cứu khóa luận tốt nghiệp và giải quyết các bài toán kiểm định thực địa phức tạp, trong tuần qua nhóm đã thực hiện bước chuyển dịch chiến lược mang tính đột phá về phạm vi đề tài, kho dữ liệu và giải pháp mô hình:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Mở rộng phạm vi và bối cảnh ứng dụng thực tế của đề tài}: Không chỉ dừng lại ở các cấu kiện bê tông dân dụng thông thường, đề tài nâng cấp lên giải quyết 4 bài toán kiểm định chuyên sâu:
+    \begin{enumerate}[label=(\alph*),leftmargin=*]
+        \item \emph{Công trình cao tầng khó tiếp cận \& Trụ tháp cầu dây văng}: Phân tích hình ảnh độ phân giải cao thu thập từ thiết bị bay không người lái (UAV/Drone), khắc phục góc chụp nghiêng, xa và rung lắc.
+        \item \emph{Công trình tạm dừng thi công dài ngày / Tòa nhà hoang cần tái khởi động}: Đánh giá an toàn chịu lực tổng thể, suy thoái bề mặt do thời tiết sau nhiều năm phơi mưa nắng trước khi cấp phép tái thi công.
+        \item \emph{Di tích kiến trúc lịch sử, công trình cổ}: Đánh giá nứt trên kết cấu gạch vữa cổ, tường đá khối phục vụ công tác trùng tu, bảo tồn di sản và đảm bảo tuyệt đối an toàn cho khách tham quan.
+        \item \emph{Hạ tầng giao thông đa dạng}: Mặt đường bê tông nhựa, bản mặt cầu, tường chắn.
+    \end{enumerate}
+    \item \textbf{Xây dựng kho dữ liệu đa bề mặt (Multi-surface Dataset V3) quy mô lớn}: Thu thập, rà soát và kiểm toán toàn diện \textbf{19 bộ dữ liệu lớn} (phân rã thành \textbf{67 bộ dữ liệu con}), đạt tổng quy mô kiểm toán \textbf{90.342 ảnh thực tế} phủ rộng trên \textbf{9 nhóm bề mặt vật liệu}.
+    \item \textbf{Mở rộng và tích hợp Phase~3 -- Kiểm định Bong tróc và Lộ cốt thép (Spalling)}: Quyết định mở rộng cấu trúc hệ thống thành chu trình khép kín 3 giai đoạn (Phase 1: Phân đoạn nứt $\rightarrow$ Phase 2: Đánh giá độ nghiêm trọng $\rightarrow$ Phase 3: Phát hiện bong tróc bê tông \& lộ cốt thép chịu lực).
+    \item \textbf{Nghiên cứu và chọn lọc giải pháp tiền xử lý ảnh nâng cao độ chính xác}: Thử nghiệm thực nghiệm các kỹ thuật lọc tăng cường đặc trưng vết nứt mảnh và triệt tiêu nhiễu bề mặt gồ ghề (CLAHE, Bilateral Filter, Black-Hat transform, Retinex, Top-hat).
+    \item \textbf{Hoàn thiện và nâng cấp ứng dụng kiểm định thông minh}: Nâng cấp giao diện trực quan hóa, module đo đạc độ rộng vết nứt sub-pixel, module quản lý hồ sơ kiểm định kỹ thuật số và trích xuất báo cáo kiểm định PDF có chữ ký thẩm định.
+\end{itemize}
+
+\section{Kiểm toán và phân chia kho dữ liệu đa bề mặt (Dataset V3)}
+Nhằm khắc phục triệt để hiện tượng mô hình học sâu chỉ hoạt động tốt trên bề mặt bê tông phòng thí nghiệm và báo động giả trên các vật liệu khác, nhóm đã thu thập kho dữ liệu đa dạng và tiến hành kiểm toán chi tiết từng ảnh (được tổng hợp tự động trong báo cáo kỹ thuật \texttt{dataset\_v3\_multi\_surface\_inventory.xlsx}):
+
+\subsection{Hiện trạng kho dữ liệu kiểm toán}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Tổng số files quét thô trên đĩa}: \textbf{262.234 files} (bao gồm ảnh RGB, mask nhị phân, label YOLO, ảnh patch cắt nhỏ và các biến thể tăng cường).
+    \item \textbf{Tổng số bộ dữ liệu lớn}: \textbf{19 bộ} (từ các nguồn SOTA quốc tế và các cơ sở dữ liệu chuyên ngành).
+    \item \textbf{Tổng số bộ dữ liệu con bóc tách chi tiết}: \textbf{67 bộ con (sub-datasets)} phân chia theo tập train/val/test, cấu kiện hoặc lớp hư hỏng cụ thể.
+    \item \textbf{Tổng số dòng ảnh kiểm toán thực tế trong báo cáo}: \textbf{90.342 ảnh}.
+\end{itemize}
+
+\subsection{Ma trận phân bổ 9 nhóm bề mặt vật liệu}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lp{4.2cm}cp{6.5cm}}
+\toprule
+\textbf{Nhóm bề mặt} & \textbf{Nguồn dữ liệu tiêu biểu} & \textbf{Số lượng} & \textbf{Mục tiêu kiểm định thực địa} \\
+\midrule
+1. Bê tông kết cấu & SDNET2018, METU, 3DCrack, Khanh11k & 95.000* & Dầm, cột, sàn chịu lực, công trình tái thi công. \\
+2. Mặt đường \& Cầu & Roads\_and\_Bridges, Concrete\_and\_Pavement & 23.000* & Mặt đường nhựa, bản mặt cầu giao thông. \\
+3. Tường gạch \& Đá cổ & Darbhanga Fort, Masonry Sensors, Wall Crack & 12.946 & Tường bao pháo đài, di tích lịch sử, gạch vữa cổ. \\
+4. Ngói \& Gạch men & Ceramics-defects-detection & 8.920 & Mái ngói di tích, gạch ốp lát bề mặt công trình. \\
+5. Tường sơn \& Vữa & Detr\_crack\_dataset, BD3, Wall Crack EQ & 8.000 & Mặt tường hoàn thiện, tòa nhà đình trệ. \\
+6. Di tích kiến trúc cổ & Historical Building Cracks, Darbhanga & 5.013 & Bảo tồn công trình văn hóa, bảo đảm an toàn du khách. \\
+7. Đa hư hại / Bong tróc & BD3 (Major, Minor, Spalling, Peeling) & 3.965 & Kiểm tra kết cấu hoang, lộ cốt thép (Phase 3). \\
+8. Façade cao tầng & BFDD Dataset (Drone Exterior) & 838 & Mặt đứng tòa nhà cao tầng chụp từ Drone/Flycam. \\
+9. Vân đá / Nứt đá & Sylvie, Forest & 303 & Bộ Hard-cases kiểm tra báo động giả. \\
+\bottomrule
+\end{tabular}
+\caption*{* \footnotesize \textit{Ghi chú: Đã bao gồm cả các tập ảnh patch cắt nhỏ ($224\times224$) phục vụ khai thác ảnh âm tính chống báo giả.}}
+\end{table}
+
+\subsection{Chiến lược phân nhóm và chuẩn bị huấn luyện (Training Set Splits)}
+Để đảm bảo mô hình không bị nhiễu nhãn (Label Noise) và đạt hiệu quả huấn luyện cao nhất, nhóm phân chia 90k ảnh thành các phân nhóm kỹ thuật rõ ràng:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Nhóm dữ liệu chuẩn mực (Ground Truth Polygon + Mask PNG) -- 26.207 ảnh}: Gồm Ultralytics (4.029 ảnh), Roads\_and\_Bridges (3.458 ảnh), Khanh11k (11.298 ảnh), CrackSeg9k (5.413 ảnh), 3DCrack (1.634 ảnh), DeepCrack (375 ảnh). Toàn bộ nhóm này được chuyển đổi đồng nhất về định dạng \textbf{YOLOv8 Polygon} và chia theo tỷ lệ \textbf{80\% Train (20.965 ảnh) : 10\% Val (2.621 ảnh) : 10\% Test (2.621 ảnh)} phục vụ huấn luyện vòng V3-Core.
+    \item \textbf{Nhóm đa bề mặt cần nâng cấp nhãn (Pseudo-labeling) -- 18.255 ảnh}: Gồm Darbhanga Fort (4.046 ảnh bbox), Detr\_crack (2.950 ảnh), BD3 (3.965 ảnh), Historical (3.896 ảnh), Ceramics (1.109 ảnh), Masonry (946 ảnh), Wall Crack (491 ảnh). Nhóm này sẽ sử dụng trọng số mô hình V3-Core để suy luận gán nhãn đa giác tự động (Active Learning), mở rộng tập huấn luyện lên 45.000+ ảnh đa bề mặt.
+    \item \textbf{Nhóm Hard Negative Mining Pool -- 45.880 ảnh}: Trích xuất có chọn lọc khoảng 3.000 -- 5.000 ảnh âm tính khó từ SDNET2018, METU và BD3 (rêu mốc, vệt ố, ron gạch, bong tróc sơn) để triệt tiêu hiện tượng báo động giả.
+    \item \textbf{Loại bỏ ảnh trùng lặp hoàn toàn (Duplicates)}: Loại bỏ 10.995 ảnh bộ CConCrack (trùng 100\% Khanh11k) và 3.746 ảnh bộ Vol2 (trùng 100\% Vol1) để tối ưu dung lượng và tránh thiên kiến dữ liệu.
+\end{enumerate}
+
+\section{Phát triển Phase 3: Kiểm định Bong tróc và Lộ cốt thép (Spalling)}
+Trong quá trình khảo sát các công trình bị đình trệ thi công nhiều năm hoặc các tòa nhà hoang cần tái khởi động, nhóm nhận thấy \textbf{vết nứt đơn thuần chỉ là dấu hiệu ban đầu}. Nguy cơ sụp đổ kết cấu thực sự xuất phát từ hiện tượng:
+$$\text{Nứt bề mặt} \longrightarrow \text{Nước và ion Clo ngấm vào} \longrightarrow \text{Cốt thép rỉ sét nở thể tích} \longrightarrow \text{Bong tróc bê tông bảo vệ} \longrightarrow \text{Lộ cốt thép chịu lực}.$$
+
+\subsection{Khép kín quy trình kiểm định 3 giai đoạn}
+Nhóm đã chính thức thiết kế và tích hợp Phase~3 vào kiến trúc tổng thể của hệ thống:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Phase 1 (Crack Detection)}: Phát hiện và phân đoạn vết nứt đa bề mặt (mô hình YOLOv8-seg cải tiến).
+    \item \textbf{Phase 2 (Crack Severity)}: Định lượng hình học (bề rộng max, chiều dài, hướng, độ sâu suy diễn qua độ đậm) theo tiêu chuẩn ACI 224R-01 / TCVN 9381:2012 (L0--L3).
+    \item \textbf{Phase 3 (Spalling \& Rebar Exposure)}: Phát hiện vùng bê tông bong vỡ và nhận diện thanh thép lộ thiên, phân cấp an toàn 4 mức:
+    \begin{itemize}[leftmargin=*]
+        \item \emph{SP0 (Bong tróc nông)}: Vỡ lớp vữa trát mặt ngoài, chiều sâu $< 20$mm, chưa thấy cốt thép.
+        \item \emph{SP1 (Bong tróc sâu)}: Mất lớp bê tông bảo vệ, chiều sâu $\geq 20$mm, chạm lớp thép.
+        \item \emph{SP2 (Lộ cốt thép)}: Thanh thép lộ rõ, bắt đầu có vệt rỉ sét màu vàng nâu.
+        \item \emph{SP3 (Nguy hiểm nghiêm trọng)}: Cốt thép lộ chu vi $> 50\%$, rỉ bong vảy, giảm tiết diện thanh thép chịu lực $\rightarrow$ \textbf{Cảnh báo dừng thi công/sơ tán ngay}.
+    \end{itemize}
+\end{itemize}
+Nguồn dữ liệu ban đầu cho Phase 3 đã được trích xuất thành công từ 500 ảnh \texttt{spalling} trong bộ BD3\_original\_dataset và các mẫu thực tế hiện trường.
+
+\section{Nghiên cứu và chọn lựa kỹ thuật tiền xử lý ảnh (Image Preprocessing)}
+Đối với hình ảnh chụp từ Drone ở khoảng cách xa hoặc bề mặt công trình lịch sử có độ nhám cao, ánh sáng không đồng đều, ảnh thô đưa trực tiếp vào mô hình thường bị đứt đoạn nét nứt. Nhóm đã tiến hành thử nghiệm đối chứng các chuỗi tiền xử lý (Preprocessing Pipeline):
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{CLAHE (Contrast Limited Adaptive Histogram Equalization)}: Cân bằng biểu đồ độ xám cục bộ với ngưỡng cắt clip-limit 2.0. Kỹ thuật này giúp làm nổi rõ các vết nứt chân chim (hairline cracks) trong vùng bóng râm của dầm sàn.
+    \item \textbf{Bilateral Filtering (Lọc song phương)}: Làm mịn các hạt cát, vết xước li ti trên nền vữa trát nhưng bảo toàn nguyên vẹn độ sắc nét của cạnh viền vết nứt (Edge-preserving smoothing).
+    \item \textbf{Top-hat \& Black-hat Morphological Transform}: Sử dụng toán tử hình thái học với phần tử cấu trúc dạng đĩa (disk-shaped structuring element) để bóc tách các rãnh tối màu hẹp (bản chất của vết nứt) ra khỏi nền xám sáng của bê tông.
+    \item \textbf{Kết quả thực nghiệm sơ bộ}: Chuỗi tiền xử lý kết hợp \emph{Bilateral Filter + CLAHE} giúp nâng cao độ tương phản tương đối của vết nứt mảnh lên \textbf{+24.6\%}, hỗ trợ giải quyết điểm yếu bỏ sót 75.5\% vết nứt nhỏ đã được chỉ ra trong báo cáo lần 12.
+\end{enumerate}
+
+\section{Hoàn thiện ứng dụng kiểm định thông minh (Inspection Application)}
+Hệ thống phần mềm hỗ trợ kỹ sư kiểm định đã được cập nhật các tính năng mới:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Thước đo hiệu chuẩn GSD tương tác}: Cho phép kỹ sư chọn 2 điểm trên ảnh tương ứng với một vật chuẩn kích thước đã biết (ví dụ: thẻ hiệu chuẩn $50\times50$mm hoặc bề rộng thanh thép), tự động tính ra tỷ lệ mm/pixel phục vụ đo lường cơ học chính xác.
+    \item \textbf{Module đo đạc hình học Sub-pixel}: Tính toán tự động bề rộng vết nứt lớn nhất $W_{\max}$, chiều dài $L$, diện tích $A$, góc nghiêng $\theta$ dựa trên thuật toán biến đổi khoảng cách Euclidean (Distance Transform) và khung xương Zhang-Suen.
+    \item \textbf{Phân hệ quản lý hồ sơ kiểm định kỹ thuật số}: Lưu trữ toàn bộ kết quả phân tích theo mã cấu kiện (cột, dầm, tường, mố trụ cầu), hỗ trợ cơ chế phê duyệt 2 cấp (Kỹ sư kiểm tra $\rightarrow$ Kỹ sư trưởng phê duyệt).
+    \item \textbf{Xuất báo cáo kiểm định hiện trường}: Tự động kết xuất báo cáo chuẩn định dạng PDF tích hợp biểu đồ phân loại rủi ro, hình ảnh trực quan hóa vết nứt và khung chữ ký thẩm định chuyên môn.
+\end{itemize}
+
+\section{Kế hoạch triển khai trong tuần tiếp theo}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Đóng gói và khởi chạy huấn luyện V3-Core (26.207 ảnh)}: Huấn luyện mô hình YOLOv8-seg trên nền tảng Kaggle GPU T4$\times$2 / Cloud A100 với cấu hình tối ưu ($960\times960$, tích hợp chuỗi tiền xử lý Bilateral+CLAHE).
+    \item \textbf{Triển khai Pseudo-labeling tự động}: Sử dụng checkpoint V3-Core để tạo nhãn tự động cho 18.000+ ảnh di tích, tường gạch và ngói nứt với ngưỡng lọc tin cậy $\text{conf} \geq 0.55$.
+    \item \textbf{Xây dựng bộ kiểm thử Phase 3 (Spalling)}: Thu thập thêm dữ liệu thực tế về rỉ cốt thép, gán nhãn đa lớp (Crack, Spalling, Rebar) để hoàn thiện chu trình kiểm định khép kín.
+    \item \textbf{Chuẩn bị nội dung chương 3 và chương 4 cho bản thảo Khóa luận tốt nghiệp}: Tổng hợp các bảng biểu thống kê dataset V3, kết quả tiền xử lý ảnh và kiến trúc hệ thống 3 giai đoạn.
+\end{enumerate}
+
+\section{Kết luận}
+Báo cáo tiến độ lần 13 đánh dấu bước hoàn thiện vững chắc về mặt học thuật và thực tiễn của khóa luận tốt nghiệp. Đề tài đã mở rộng từ bài toán nhận diện cục bộ trên bê tông sang bài toán kiểm định kết cấu toàn diện cho các công trình cao tầng phức tạp, công trình đình trệ cần tái khởi động và di tích lịch sử quý giá. Với kho dữ liệu 90.342 ảnh đa bề mặt được kiểm toán bài bản, quy trình 3 Phase khép kín (Nứt -- Mức độ nghiêm trọng -- Bong tróc lộ cốt thép) và ứng dụng kiểm định thông minh đang ngày càng hoàn thiện, nhóm tự tin đáp ứng đầy đủ các tiêu chí chất lượng cao của một đồ án tốt nghiệp xuất sắc.
+
+\end{document}

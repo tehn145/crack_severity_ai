@@ -31,7 +31,7 @@ from . import db
 from .model_service import DEFAULT_IMGSZ, detect, get_model
 from .severity import SCALE_META
 
-APP_VERSION = "2.0.0-phase1"
+APP_VERSION = "3.1.0-phase1+2"
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(title="Crack Severity AI — Phase 1", version=APP_VERSION)
@@ -40,9 +40,42 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 COMPONENTS = ["cột", "tường", "sàn", "dầm", "cầu thang", "ban công", "khác"]
 
 
+INFRA_DIR = Path(__file__).parent / "static" / "infra"
+
+
+def _infra(name: str) -> Response:
+    return HTMLResponse(
+        (INFRA_DIR / name).read_text(encoding="utf-8"),
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 def index() -> Response:
-    return HTMLResponse((STATIC_DIR / "index.html").read_text(encoding="utf-8"))
+    """INFRA-GUARD gateway — template gốc 100%."""
+    return _infra("infra_guard_3d_interactive_welcome_gateway.html")
+
+
+@app.get("/registry", response_class=HTMLResponse)
+def registry() -> Response:
+    """Operational Console — template Building Infrastructure Registry 100%."""
+    return _infra("building_infrastructure_registry.html")
+
+
+@app.get("/console", response_class=HTMLResponse)
+def console() -> Response:
+    """Console đa-tab: ghép verbatim Registry + PE Review + Marketplace."""
+    return _infra("console.html")
+
+
+@app.get("/review", response_class=HTMLResponse)
+def review() -> Response:
+    return _infra("structural_evaluation_pe_sign_off_review.html")
+
+
+@app.get("/marketplace", response_class=HTMLResponse)
+def marketplace() -> Response:
+    return _infra("engineering_services_marketplace.html")
 
 
 @app.get("/api/health")
@@ -200,27 +233,45 @@ def dashboard() -> dict:
 
 @app.get("/api/model-info")
 def model_info() -> dict:
-    """Thông tin model + benchmark v1 (từ docs/experiment_log.md) cho view Phân tích."""
+    """Thông tin model + benchmark (v1 active, v2 tham chiếu) cho view Phân tích."""
     return {
         "version": APP_VERSION,
         "model": "YOLOv8s-seg (Ultralytics)",
-        "trained": "Kaggle T4, imgsz 640, 100 epochs, ~15.9k ảnh",
+        "active": "v1 — imgsz 640, 100 epochs (chọn sau khi so sánh v2)",
+        "trained_v1": "Kaggle T4, imgsz 640, 100 epochs, 15.947 ảnh",
+        "trained_v2": "imgsz 1280 + multi_scale, +3.000 ảnh âm, +118 pseudo-GT (~76 epochs)",
         "test_metrics": {
             "box": {"P": 0.823, "R": 0.565, "mAP50": 0.599, "mAP50-95": 0.455},
             "mask": {"P": 0.794, "R": 0.492, "mAP50": 0.488, "mAP50-95": 0.145},
         },
+        "test_metrics_note": "v1 (active). v2 @1280: instance F1 tối đa 0.514 < v1 0.655 → giữ v1",
         "image_level_acc": 0.999,
         "neg_fp_rate": 0.022,
+        "neg_fp_rate_note": "v1 @640: 2.2% — v2 @1280: 1.5% (v2 tốt hơn ở mục này)",
+        "model_compare": {
+            "v1_640": {"inst_F1": 0.655, "inst_P": 0.797, "inst_R": 0.555,
+                        "dice_3dcrack": 0.708, "dice_deepcrack": 0.819,
+                        "neg_fp": 0.022, "verdict": "ACTIVE — F1 instance cao nhất"},
+            "v2_1280": {"inst_F1": 0.514, "inst_P": 0.516, "inst_R": 0.511,
+                         "dice_3dcrack": 0.718, "dice_deepcrack": 0.803,
+                         "neg_fp": 0.015, "verdict": "Tham chiếu — FP thấp hơn nhưng precision sụp @IoU0.5"},
+        },
         "sota_ref": {
             "paper": "arXiv:2508.10256 (Georgia Tech, 2025)",
             "deepcrack": {"ours_dice": 0.819, "resunet_dice": 0.833},
             "3dcrack": {"ours_dice": 0.708, "resunet_dice": 0.795},
+            "note": "số của model active (v1)",
         },
         "data": {
             "train": 14619, "val": 1484, "test": 1491,
             "negatives_train": 4048,
             "sources": ["3DCrack_v1", "crack_segmentation_dataset", "DeepCrack",
                         "Roads_and_Bridges", "Ultralytics_CrackSeg", "METU Negative", "SDNET"],
+        },
+        "phase2": {
+            "type": "rule-based (Lớp A morphology + Lớp B tín hiệu)",
+            "scale": "4 mức L0–L3 theo ACI 224R-01 / TCVN 9381:2012",
+            "inputs": ["width_max × GSD", "branching (skeleton)", "multi_plane", "through_member"],
         },
     }
 
@@ -261,6 +312,51 @@ async def inspection_status(
     return ins
 
 
+@app.post("/api/inspections/{ins_id}/severity")
+async def inspection_reclassify(
+    ins_id: int,
+    gsd_mm_per_px: Annotated[float, Form()],
+    through_flags: Annotated[str, Form()] = "[]",
+) -> JSONResponse:
+    """Phase 2: phân loại lại mức độ của hồ sơ ĐÃ LƯU (không cần ảnh/model).
+
+    Dùng khi kỹ sư nhập/đổi GSD sau khi lưu, hoặc đánh dấu vết xuyên cấu kiện.
+    """
+    import json as _json
+
+    from .severity import classify
+
+    if gsd_mm_per_px <= 0:
+        raise HTTPException(400, "Cần GSD (mm/pixel) > 0.")
+    try:
+        flags = _json.loads(through_flags) if through_flags else []
+    except _json.JSONDecodeError:
+        raise HTTPException(400, "through_flags sai định dạng.")
+
+    def label_for(d: dict, through: bool) -> str | None:
+        w_mean = d.get("width_px")
+        if d.get("area_px") and d.get("length_px"):
+            w_mean = d["area_px"] / d["length_px"]  # tái tạo width_mean từ px đã lưu
+        sev = classify(
+            w_mean,
+            gsd_mm_per_px,
+            width_max_px=d.get("width_max_px"),
+            length_px=d.get("length_px"),
+            branching=bool(d.get("branching")),
+            multi_plane=bool(d.get("multi_plane")),
+            through_member=through,
+            contrast_ratio=d.get("contrast_ratio"),
+        )
+        if sev is None:
+            return None
+        return f"L{sev['level']} {sev['name']} ({sev['width_mm']}mm)"
+
+    ins = db.reclassify_inspection(ins_id, gsd_mm_per_px, flags, label_for)
+    if ins is None:
+        raise HTTPException(404, "Không tìm thấy hồ sơ.")
+    return JSONResponse(ins)
+
+
 @app.get("/api/inspections/{ins_id}/report.html", response_class=HTMLResponse)
 def inspection_report(ins_id: int) -> HTMLResponse:
     ins = db.get_inspection(ins_id)
@@ -288,23 +384,23 @@ def inspection_report(ins_id: int) -> HTMLResponse:
     html = f"""<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
 <title>Báo cáo kiểm định #{ins_id}</title>
 <style>
-body{{font-family:'Segoe UI',Arial,sans-serif;margin:0;color:#222}}
-.page{{max-width:860px;margin:0 auto;padding:40px}}
+body{{font-family:'Segoe UI',Arial,sans-serif;margin:0;color:#0f172a;background:#f6f8fb}}
+.page{{max-width:860px;margin:0 auto;padding:40px;background:#fff;min-height:100vh}}
 .letterhead{{display:flex;justify-content:space-between;align-items:flex-end;
-border-bottom:3px solid #1a5276;padding-bottom:12px;margin-bottom:20px}}
-.letterhead .logo{{font-size:20px;font-weight:700;color:#1a5276}}
-.letterhead .logo small{{display:block;font-weight:400;color:#666;font-size:12px}}
-.letterhead .docno{{text-align:right;font-size:13px;color:#555}}
+border-bottom:3px solid #2563eb;padding-bottom:12px;margin-bottom:20px}}
+.letterhead .logo{{font-size:20px;font-weight:700;color:#2563eb}}
+.letterhead .logo small{{display:block;font-weight:400;color:#64748b;font-size:12px}}
+.letterhead .docno{{text-align:right;font-size:13px;color:#475569}}
 .st-badge{{display:inline-block;padding:4px 14px;border-radius:99px;color:#fff;font-size:12px;font-weight:700;background:{st_color}}}
-h1{{font-size:19px;color:#1a5276;margin:18px 0 8px}}
+h1{{font-size:19px;color:#1d4ed8;margin:18px 0 8px}}
 table{{border-collapse:collapse;width:100%;margin-top:10px}}
-td,th{{border:1px solid #9aa; padding:7px 10px;font-size:13.5px}}
-th{{background:#eaf2f8;text-align:left}}
+td,th{{border:1px solid #cbd5e1; padding:7px 10px;font-size:13.5px}}
+th{{background:#eff6ff;text-align:left}}
 .meta td{{border:none;padding:3px 12px 3px 0;font-size:14px}}
-footer{{margin-top:26px;font-size:11.5px;color:#777;border-top:1px solid #ccc;padding-top:8px}}
+footer{{margin-top:26px;font-size:11.5px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:8px}}
 .signs{{display:flex;justify-content:space-between;margin-top:38px;gap:40px}}
 .sign{{flex:1;text-align:center;font-size:13px}}
-.sign .line{{margin-top:64px;border-top:1px solid #333;padding-top:6px}}
+.sign .line{{margin-top:64px;border-top:1px solid #334155;padding-top:6px}}
 @media print .noprint{{display:none}}
 </style></head><body><div class="page">
 <div class="letterhead">
@@ -337,7 +433,7 @@ footer{{margin-top:26px;font-size:11.5px;color:#777;border-top:1px solid #ccc;pa
 </div>
 <footer>
 Mức độ nghiêm trọng theo thang ĐỀ XUẤT 4 mức tham chiếu ACI 224R-01 / TCVN 9381:2012
-(chờ phê duyệt — xem docs/severity_definition.md). Kết quả máy hỗ trợ, không thay thế
+(chờ phê duyệt — xem docs/standards/severity_definition.md). Kết quả máy hỗ trợ, không thay thế
 kết luận của kỹ sư kiểm định. © crack_severity_ai — khóa luận tốt nghiệp.
 </footer>
 </div></body></html>"""
@@ -377,6 +473,52 @@ def stats() -> dict:
         "by_component": dict(comps),
         "by_severity": dict(sev),
     }
+
+
+@app.post("/api/severity")
+async def reclassify_severity(
+    detections_json: Annotated[str, Form()],
+    gsd_mm_per_px: Annotated[float, Form()],
+    through_flags: Annotated[str, Form()] = "[]",
+) -> JSONResponse:
+    """Phân loại lại Phase 2 KHÔNG cần chạy model lại.
+
+    - detections_json: mảng detections từ /api/predict (có width/length px).
+    - through_flags: mảng bool theo thứ tự vết — kỹ sư đánh dấu "nứt xuyên cấu kiện".
+    Trả về detections đã cập nhật severity + summary.
+    """
+    import json as _json
+
+    from .severity import classify
+
+    if gsd_mm_per_px <= 0:
+        raise HTTPException(400, "Cần GSD (mm/pixel) > 0 để phân loại.")
+    try:
+        dets = _json.loads(detections_json)
+        flags = _json.loads(through_flags) if through_flags else []
+    except _json.JSONDecodeError:
+        raise HTTPException(400, "JSON sai định dạng.")
+
+    out = []
+    for i, d in enumerate(dets):
+        d = dict(d)
+        d.pop("severity", None)
+        d["severity"] = classify(
+            d.get("width_mean_px"), gsd_mm_per_px,
+            width_max_px=d.get("width_max_px"),
+            length_px=d.get("length_px"),
+            branching=bool(d.get("branching")),
+            multi_plane=bool(d.get("multi_plane")),
+            through_member=bool(flags[i]) if i < len(flags) else False,
+        )
+        out.append(d)
+
+    sev_counts = Counter(f"L{d['severity']['level']}" for d in out if d.get("severity"))
+    return JSONResponse({
+        "detections": out,
+        "severity_summary": dict(sev_counts),
+        "gsd_mm_per_px": gsd_mm_per_px,
+    })
 
 
 @app.get("/api/demo-image")

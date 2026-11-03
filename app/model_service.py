@@ -82,10 +82,11 @@ def detect(
 ) -> tuple[list[dict], np.ndarray, float]:
     """Chạy Phase 1 trên 1 ảnh BGR. Trả về (detections, ảnh chú thích, thời gian ms).
 
-    gsd_mm_per_px: thang đo ảnh (mm/pixel) — có thì gắn phân loại severity đề xuất.
+    gsd_mm_per_px: thang đo ảnh (mm/pixel) — có thì gắn phân loại severity (Phase 2).
     """
     import time
 
+    from .crack_features import contrast_ratio, crack_features
     from .severity import classify
 
     model = get_model()
@@ -111,8 +112,18 @@ def detect(
             feats = crack_features(poly)
             det.update(feats)
             det["mask_points"] = [[round(float(p[0]), 1), round(float(p[1]), 1)] for p in poly]
+            # Lớp B (heuristic): skeleton >=2 điểm rẽ nhánh → mạng lưới nứt giao nhau
+            multi_plane = bool(feats.get("n_branches", 0) >= 2)
+            det["multi_plane"] = multi_plane
+            # Độ đậm: mức tối của vết so với nền (proxy độ sâu)
+            det["contrast_ratio"] = contrast_ratio(img_bgr, poly)
             det["severity"] = classify(
-                feats.get("width_mean_px"), gsd_mm_per_px, feats.get("length_px")
+                feats.get("width_mean_px"), gsd_mm_per_px,
+                width_max_px=feats.get("width_max_px"),
+                length_px=feats.get("length_px"),
+                branching=bool(feats.get("branching")),
+                multi_plane=multi_plane,
+                contrast_ratio=det["contrast_ratio"],
             )
         else:
             det["severity"] = None

@@ -1,8 +1,44 @@
-# severity_definition.md — Đề xuất thang mức độ nghiêm trọng vết nứt (Phase 2)
+# severity_definition.md — Thang mức độ nghiêm trọng vết nứt (Phase 2)
 
-> TRẠNG THÁI: **BẢN ĐỀ XUẤT — chờ team chốt**. Chưa hard-code vào code (quy tắc AGENTS.md).
+> TRẠNG THÁI: **ĐÃ CHỐT (bản đề xuất được duyệt triển khai 2026-10-26)** —
+> triển khai rule-based tại `app/severity.py`, thang hiển thị "đề xuất" trong UI
+> cho đến khi nghiệm thu khóa luận chính thức.
 > Tham chiếu: ACI 224R-01 (bảng bề rộng nứt chấp nhận được), TCVN 9381:2012 (quy trình
 > quản lý, duy tu, bảo trì công trình), kết hợp đặc trưng Lớp A/Lớp B trong ARCHITECTURE.md.
+
+## Cập nhật khi chốt triển khai (2026-10-26)
+
+- **Bề rộng dùng để phân loại: bề rộng LỚN NHẤT** (`width_max_px × GSD`) — đúng thực hành
+  kiểm định (ke đo crack gauge đo bề rộng lớn nhất); ACI 224R-01 đặt ngưỡng theo max width.
+- Bề rộng lớn nhất đo bằng distance-transform trên mask (`app/crack_features.py`).
+- **Branching** phát hiện bằng skeleton hóa Zhang-Suen (≥1 điểm rẽ nhánh).
+- **Lớp B** hiện gồm: tín hiệu `multi_plane` (heuristic: skeleton ≥2 nhánh) và cờ
+  `through_member` do kỹ sư đánh dấu trên UI (checkbox "Xuyên?" trong bảng vết nứt).
+- **Hiệu chuẩn GSD trên ảnh**: công cụ "📏 Đo GSD" trong app — bấm 2 điểm vào vật
+- **Kiểm chứng đo lường**: width_max sai số ≤ 1px, length 0px, angle 0°
+  (scripts/validate_measurements.py)
+
+## Đa yếu tố — xử lý vết DÀI NHƯNG MẢNH và vết ĐẬM (2026-10-27)
+
+Bề rộng một mình KHÔNG đủ: vết dài 750mm nhưng mảnh 0.15mm nếu chỉ tra width sẽ ra
+L1 trong khi thực tế đáng lo. Vì vậy severity = **neo ACI theo bề rộng + các yếu tố
+bổ sung, mỗi yếu tố +1 mức, tổng tối đa +2, chặn tại L3** — mọi lý do hiển thị
+trên chip và trong báo cáo (giải thích được):
+
+| Yếu tố | Ngưỡng | Ý nghĩa kỹ thuật |
+|---|---|---|
+| Chiều dài | length_mm ≥ **300 mm** | Hư hỏng lan rộng — vết dài nguy cơ tiến triển |
+| Độ đậm (contrast) | **≥ 30%** tối hơn nền cục bộ | Proxy cho ĐỘ SÂU: vết sâu đậm hơn nền; hairline cạn thường mờ |
+| Lớp B | branching / multi_plane | Mạng lưới nứt, giao cắt cấu kiện |
+| Xuyên cấu kiện | kỹ sư đánh dấu | **L3 tuyệt đối** |
+
+- **Contrast** đo từ ảnh gốc: (mean nền − mean vết) / mean nền, nền = vòng đệm 9px
+  quanh mask — `app/crack_features.contrast_ratio`, đã test vết đậm vs nhạt.
+- Ví dụ (đã test): vết mảnh 0.15mm + dài 750mm + đậm 50% → L1 → **L3**
+  (width-only sẽ bỏ sót case này).
+- Ngưỡng 300mm / 30% là đề xuất ban đầu — chỉnh tại `app/severity.py` khi có dữ liệu thực đo.
+  chuẩn, nhập chiều dài thật (mm) → GSD tự điền, tự phân loại lại toàn bộ vết.
+- Phân loại lại không cần chạy model: `POST /api/severity`.
 
 ## 1. Cơ sở khoa học
 
