@@ -21,7 +21,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Ruff lint
-        run: ruff check app scripts/evaluate_phase1.py tests
+        run: ruff check app scripts/evaluation/evaluate_phase1.py tests
 
       - name: Pytest (unit + API smoke; test cần weight tự skip)
         run: pytest tests -v --tb=short
