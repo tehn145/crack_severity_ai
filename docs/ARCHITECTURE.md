@@ -1,83 +1,83 @@
 # ARCHITECTURE.md — Kiến trúc Hệ thống crack_severity_ai
 
-## Tổng quan pipeline đa giai đoạn (Multi-Stage Defect Cascade)
+## Tổng quan pipeline 3 Phase chuyên biệt (Multi-Expert Cascaded Architecture)
 
 ```
-Ảnh 2D (Chụp cấu kiện dầm/cột/sàn/tường)
+Ảnh 2D Hiện Trường / Quét Toàn Thư Mục Tầng / Di Sản (Tháp Bà Ponagar)
   │
-  ├─► Multi-Defect Detection & Segmentation (YOLOv8-seg)
-  │     ├── Nhánh Vết nứt (Crack)
-  │     ├── Nhánh Bong tróc (Spalling)
-  │     └── Nhánh Cốt thép lộ (Exposed Rebar)
+  ├──► [TẦNG 1: DUAL SPECIALIST INFERENCE — CHẠY SONG SONG ĐỘC LẬP]
+  │     │
+  │     ├── Nhánh Phase 1: Chuyên gia Vết nứt (Crack Specialist)
+  │     │     ├── Phase 1.A: Bề mặt dễ (Tường, Đường, Bê tông phẳng) -> Target mAP50 >93%
+  │     │     │     └── Tiền xử lý: Bilateral Filter (d=5, σ=50) + Adaptive CLAHE (clip=2.5) + 12% Ảnh âm nền
+  │     │     └── Phase 1.B: Bề mặt khó (Di sản gạch cổ, Gạch men bóng, Mạch vữa xây)
+  │     │           └── Tiền xử lý: Multi-Scale Retinex khử bóng phản quang + Gabor filter
+  │     │
+  │     └── Nhánh Phase 2: Chuyên gia Kết cấu Phá hủy (Spalling & Rebar Specialist)
+  │           ├── Triệt tiêu 100% nhãn 'crack' (không xung đột dữ liệu với Phase 1)
+  │           ├── Class 0: spalling (Bong tróc bê tông thể tích)
+  │           ├── Class 1: exposed_rebar (Lộ cốt thép chịu lực)
+  │           └── Class 2: corrosion (Gỉ sét ăn mòn kim loại)
+  │                 └── Tiền xử lý: CIE-Lab khuếch đại màu oxit sắt Fe2O3 đỏ nâu -> Target mAP50 >90%
   │
-  ├─► Phase 2: Crack Severity Classification (Đánh giá Vết nứt)
-  │     ├── Lớp A: Đặc trưng hình học (chiều dài, width_max, branching, diện tích, contrast_ratio)
-  │     ├── Lớp B: Ngữ cảnh cấu kiện (single_plane / multi_plane, xuyên cấu kiện)
-  │     └── Output: Mức độ nghiêm trọng nứt L0–L3 (ACI 224R-01 / TCVN 9381:2012)
+  ├──► [TẦNG 2: AI NHẬN DIỆN & BO KHUNG CẤU KIỆN (COMPONENT RECOGNITION)]
+  │     ├── Tự động vẽ Bounding Box / Mask phân định cấu kiện:
+  │     │     Cột (3.0x), Nút dầm-cột (3.5x), Dầm (2.5x), Bản sàn/Trần (1.5x), Tường (1.0x), Cổ cột móng (4.0x)
+  │     └── Spatial Containment: Ánh xạ vết nứt / mảng vỡ thuộc về cấu kiện nào (IoU / Point-in-Box)
   │
-  └─► Phase 3: Spalling & Exposed Rebar Assessment (Đánh giá Bong tróc & Lộ cốt thép)
-        ├── Đặc trưng Spalling: Diện tích vỡ ($S_{\text{spall}}$), chiều sâu tương đối, tỷ lệ diện tích
-        ├── Đặc trưng Rebar: Số lượng thanh lộ, chiều dài lộ ($L_{\text{rebar}}$), mức độ rỉ sét
-        ├── Đánh giá an toàn tái khởi công: Thang SP0–SP3 (TCVN 9381:2012, ACI 562-19)
-        └── Output: Kết luận an toàn cho phép tiếp tục xây dựng hay đình chỉ gia cố kết cấu
+  └──► [TẦNG 3: PHASE 3 SHM ENGINE — GIÁM ĐỊNH TOÀN DIỆN CÔNG TRÌNH]
+        ├── Khử chồng lấn không gian (ORB Homography Matching) giữa các ảnh kề nhau khi quét cả tầng
+        ├── Tính tỷ lệ diện tích hư hỏng thực tế so với toàn bộ không gian hình học
+        ├── Bảng phân tích đa chiều (Sorting & Filtering):
+        │     - Lọc theo từng cấu kiện (Cột, Dầm, Sàn, Tường)
+        │     - Sắp xếp số vết nứt / spalling giảm dần (VD: Cột C12 có 7 vết nứt -> Ưu tiên xử lý)
+        ├── Chỉ số nguy cơ sụp đổ Structural Collapse Index (SCI 0 - 100%): 4 cấp độ cảnh báo
+        └── Báo cáo kỹ thuật in PDF chuẩn quy trình thẩm định PE Sign-off
 ```
 
 ---
 
 ## Cấu trúc dữ liệu huấn luyện
 
-### 1. Dữ liệu Phase 1 (Crack Detection)
+### 1. Dữ liệu Phase 1 (Crack Specialist)
 `data/processed/phase1/`
-* `primary/`: Dữ liệu sạch chuẩn (bê tông, tường, đường, sàn cầu) $\to$ huấn luyện chính.
-* `expanded/`: Dữ liệu mở rộng đa bề mặt (mặt đường, gạch masonry, đá).
-* `hard_cases/`: Vân đá + họa tiết dễ gây báo giả (dùng đo độ cứng OOD / fine-tune).
-* `full/`: Gộp tất cả các nguồn.
+* `v5_phase1_a_easy/`: Dữ liệu sạch bề mặt dễ (Tường, Đường nhựa, Bê tông phẳng tương phản cao) được tiền xử lý Bilateral + CLAHE + 12% ảnh âm nền (từ METU Negative và SDNET UD). Nhãn YOLO polygon 1 class: `0: crack`.
+* `v5_phase1_b_hard/`: Dữ liệu bề mặt khó (Di sản gạch cổ, Gạch men bóng, Mạch vữa xây).
+* `primary/`: Baseline 16k ảnh chuẩn (tham chiếu).
+* `hard_cases/`: Tập kiểm thử vân đá OOD đo độ cứng báo giả.
 
-Mỗi tập gồm: `images/{train,val,test}` và `labels/{train,val,test}` (định dạng YOLO polygon class 0 = crack).
-
-### 2. Dữ liệu Phase 3 (Spalling & Exposed Rebar)
-`data/processed/phase3/` (chuẩn bị tích hợp từ CrSpEE, SegCODEBRIM, CUHK-USR, Roboflow):
-* `class 0`: crack
-* `class 1`: spalling
-* `class 2`: exposed_rebar
-
----
-
-## Trạng thái hiện tại của các Phase
-
-### Phase 1 — Vết nứt (Đang active)
-* **Dữ liệu**: primary v2 gồm 17.594 ảnh (train 14.619 / val 1.484 / test 1.491) + 4.048 ảnh âm train.
-* **Mô hình active**: YOLOv8s-seg @640 (`weights/phase1/best.pt`), FP trên ảnh âm chỉ 2.2%, F1 instance 0.655, Dice DeepCrack 0.819.
-* **Đang chuẩn bị v3/v4**: Tiled training cho vết mảnh (Volker/Rissbilder) + gộp hard-negative vân đá và đưa lại nhóm mặt đường.
-
-### Phase 2 — Phân loại mức độ vết nứt (ĐÃ HOÀN THIỆN + KIỂM CHỨNG)
-* **Lớp A**: `length`, `width_mean`, `width_max` (Distance Transform chính xác hiệu chỉnh nửa pixel, sai số $\le 1\text{px}$), `angle` (moments, $0^\circ$ ngang), `branching` (skeleton Zhang-Suen), `contrast_ratio` (proxy cho độ sâu vết nứt).
-* **Kiểm chứng đo lường**: `scripts/validate_measurements.py` $\to$ ĐẠT NGHIỆM THU.
-* **Lớp B**: Heuristic `multi_plane` + cờ `through_member` (kỹ sư đánh dấu UI, ép L3).
-* **Quy tắc phân loại**: Bề rộng MAX $\times$ GSD theo thang 4 mức ACI 224R-01 / TCVN 9381:2012; điều chỉnh đa yếu tố (chiều dài $\ge 300\text{mm}$, độ đậm $\ge 30\%$).
-
-### Phase 3 — Bong tróc & Lộ cốt thép cho công trình tái khởi công (ĐANG THIẾT KẾ & TÍCH HỢP)
-* **Mục đích**: Chuyên dụng đánh giá an toàn cho các **tòa nhà đình trệ, công trình dở dang qua nhiều năm** trước khi tiếp tục thi công.
-* **Thang 4 cấp SP0–SP3**:
-  * `SP0`: Bong tróc nông lớp vữa ngoài $\to$ An toàn, thi công tiếp.
-  * `SP1`: Vỡ bê tông bảo vệ ($10\text{--}25\text{mm}$), chưa lộ thép $\to$ Trám vữa không co ngót.
-  * `SP2`: Lộ cốt thép kết cấu, gỉ bề mặt $\to$ Xử lý đánh gỉ + bù bê tông trước khi tăng tải.
-  * `SP3`: Lộ cốt thép diện rộng, gỉ rộp giảm tiết diện $>10\%$, bê tông lõi vỡ dập $\to$ **CẤM TÁI KHỞI CÔNG**, bắt buộc chống đỡ tạm và gia cố kết cấu.
-* **Chi tiết kỹ thuật**: Xem đầy đủ tại [docs/standards/SPALLING_PHASE.md](file:///d:/crack_severity_ai/docs/standards/SPALLING_PHASE.md).
+### 2. Dữ liệu Phase 2 (Spalling & Rebar Specialist)
+`data/processed/phase2/`
+* `v2_clean_multidefect/`: Dữ liệu 3 lớp khuyết tật thể tích độc lập (không có nhãn `crack`):
+  * `class 0`: `spalling` (Bong tróc bê tông)
+  * `class 1`: `exposed_rebar` (Lộ cốt thép chịu lực)
+  * `class 2`: `corrosion` (Ăn mòn gỉ sét)
+  * Kèm 12% ảnh âm (bê tông lành lặn không bong tróc từ `spall nonAccepted`).
 
 ---
 
-## Serving & Demo System (v3.1)
-* **Backend**: FastAPI (`app/main.py`) + SQLite lưu trữ hồ sơ kiểm định (`inspections`, `detections`).
-* **Frontend**: SPA giao diện doanh nghiệp 6 phân hệ (Dashboard, Wizard kiểm định 4 bước, Hồ sơ & Duyệt, Phase 2, Model benchmark, Thiết lập).
-* **Quy trình doanh nghiệp**: Dự án $\to$ Kiểm định $\to$ Chờ duyệt $\to$ Đã duyệt (phân vai Kỹ sư / Quản lý) $\to$ Xuất báo cáo in PDF chuẩn có 2 khung chữ ký.
-* **Công cụ tương tác**: Đo GSD 2 điểm trực tiếp trên ảnh; API tái phân loại không cần inference lại (`POST /api/severity`).
-* **DevOps**: Docker, docker-compose, CI/CD GitHub Actions deploy tự động lên Hugging Face Spaces (CPU).
-* **Kiểm thử tự động**: 28/28 pytest unit test + 7/7 bước end-to-end pass.
+## Chi tiết kỹ thuật các Phase
+
+### Phase 1.A — Vết nứt Bề mặt Dễ (Đột phá >93% mAP50)
+* **Backbone**: `yolov8m-seg.pt` (25.9M params) @ `imgsz=1024`.
+* **Tiền xử lý**: Bilateral Filter ($d=5, \sigma=50$) khử nhiễu hạt cát + Adaptive CLAHE ($clip=2.5, tile=8\times 8$) làm nổi vết nứt.
+* **Quy mô sạch**: ~28,700 ảnh (bao gồm 3,500 ảnh âm chống ảo giác).
+
+### Phase 2 — Bong tróc & Cốt thép (Đột phá >90% mAP50)
+* **Backbone**: `yolov8m-seg.pt` @ `imgsz=1024`.
+* **Tiền xử lý**: Không gian màu CIE-Lab khuếch đại kênh $a^*$ và $b^*$ cho gỉ sét đỏ nâu, triệt tiêu bóng tối dưới hốc vỡ bằng Retinex.
+* **Quy mô sạch**: ~12,700 ảnh sạch đa khuyết tật (Rebar Exposure, RC Structure, HRCDS, spallSubImage).
+
+### Phase 3 — Hệ thống Giám định Kết cấu (SHM Engine)
+* **Khảo sát phân cấp**: Hỗ trợ quét theo Tầng (Tầng 1..N) hoặc Khối di sản kiến trúc (Tháp Bà Ponagar).
+* **Khử trùng lặp ORB**: Tự động tính ma trận Homography giữa các góc chụp kề nhau, trừ hao diện tích chồng lấn trước khi tính phần trăm hư hỏng toàn không gian.
+* **AI Bo khung cấu kiện**: Tự động nhận diện biên giới hạn của Cột, Dầm, Sàn, Nút khung, Móng và tính hệ số rủi ro chịu lực $W_c \in [1.0, 4.0]$.
+* **Bộ lọc Sort/Filter**: Lọc theo cấu kiện và sắp xếp số lượng vết nứt/spalling giảm dần.
+* **SCI Index**: Điểm số nguy cơ sụp đổ từ 0 - 100% kèm khuyến nghị kỹ thuật (bơm Epoxy, dán sợi carbon CFRP, bọc thép hình, hoặc sơ tán khẩn cấp).
 
 ---
 
-## Quyết định kỹ thuật đã chốt
-1. **Kiến trúc cốt lõi**: Mô hình học sâu thị giác 2D (YOLOv8-seg), không lệ thuộc sensor 3D hay ảnh nhiệt tốn kém.
-2. **Nguyên tắc an toàn kết cấu**: Mọi thang phân cấp (Vết nứt L0–L3, Bong tróc SP0–SP3) phải có chỗ dựa tiêu chuẩn kỹ thuật (ACI 224R, TCVN 9381, ACI 562).
-3. **Phân cấp độc lập**: Nhánh vết nứt và nhánh bong tróc có tiêu chí đánh giá riêng, sau đó tổng hợp thành Chỉ số An toàn Cấu kiện (Structural Safety Score) phục vụ nghiệm thu tái khởi công.
+## Serving & Web App Demo
+* **Backend**: FastAPI (`app/main.py`), SQLite lưu trữ hồ sơ, module AI phân loại cấu kiện (`app/component_classifier.py`), router Phase 3 (`app/phase3_endpoints.py`).
+* **Frontend**: SPA giao diện doanh nghiệp (`app/static/index.html`) tích hợp trực tiếp bảng điều khiển **Phase 3 SHM Console** (`app/static/phase3_demo.html`).
+* **Quy trình thẩm định**: Tải ảnh đơn hoặc thư mục quét cả tầng $\to$ AI tự động nhận diện cấu kiện $\to$ Khử trùng lặp $\to$ Tính điểm SCI $\to$ Bảng phân tích lọc sort $\to$ Xuất báo cáo PE sign-off in PDF.

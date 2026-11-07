@@ -1,43 +1,53 @@
 # ROADMAP.md — Lộ trình Phát triển crack_severity_ai
 
-## 1. Đã xong (Giai đoạn Phase 1 & Hệ thống Serving)
-* **Thu thập & Chuẩn hóa dữ liệu Phase 1**:
-  * Chuẩn hóa toàn bộ nguồn (mask + txt) về YOLO polygon thuần (class 0 = crack).
-  * Xây dựng tập `primary v2` gồm 17.594 ảnh + 4.048 ảnh âm nền, chia split 80/10/10 bằng hash deterministic.
-  * Tách riêng 303–306 ảnh vân đá OOD (`hard_cases`) phục vụ đo lường báo giả chuyên biệt.
-* **Huấn luyện & Đánh giá Phase 1 v1**:
-  * YOLOv8s-seg @640, Kaggle T4 $\to$ `weights/phase1/best.pt`.
-  * Đo kiểm trên test set: mức ảnh đạt 0.999, FP trên ảnh âm chỉ 2.2%, F1 instance 0.655.
-  * So sánh với SOTA (arXiv:2508.10256): DeepCrack Dice đạt 0.819 (sát ResUNet 0.833).
-* **Nền tảng phục vụ (Serving & DevOps)**:
-  * Backend FastAPI + SQLite + SPA UI 6 phân hệ (Dashboard, Wizard kiểm định 4 bước, Hồ sơ, Phase 2, Model, Thiết lập).
-  * Dockerfile + docker-compose, CI/CD GitHub Actions deploy tự động lên Hugging Face Spaces.
-  * Bộ kiểm thử: 28/28 pytest unit tests + 7/7 bước E2E tests pass.
+## 1. Đã hoàn thành (Baseline & Nghiệm thu nền tảng)
+* **Phase 1.1 Baseline Core**: 20,129 ảnh, 120 epochs $\to$ Box mAP50 = 73.9%, Mask mAP50 = 57.6%.
+* **Phase 1.2 Multi-Surface Expansion**: 22,358 ảnh (bổ sung gạch men, gạch cổ, pháo đài), 60 epochs $\to$ Box mAP50 = 75.2%, Mask mAP50 = 61.4% (tăng +3.8%), tốc độ 4.6ms (~217 FPS).
+* **Phase 2 Multi-Defect V1**: 6,256 ảnh, 100 epochs $\to$ Box mAP50 = 64.6%, Rebar đạt 72.6%, Spalling đạt 70.0%.
+* **Phase 3 SHM Engine Prototype**:
+  * Dual model inference chạy đồng thời Phase 1.2 và Phase 2.
+  * Spatial Overlap Deduplication (ORB Feature Matching + Homography).
+  * Structural Risk Multiplier theo vai trò chịu lực ($W_c \in [1.0, 3.5]$).
+  * Thuật toán chỉ số nguy cơ sụp đổ Structural Collapse Index (SCI 0 - 100%).
+  * AI Structural Component Classifier tự động nhận diện cấu kiện (`app/component_classifier.py`).
+  * Tích hợp Web App giao diện Phase 3 Console (`/phase3`) và kiểm thử tự động 21/21 tests pass 100%.
 
-## 2. Đã xong (Giai đoạn Phase 2 — Đánh giá mức độ vết nứt)
-* **Thang 4 mức L0–L3** chốt theo ACI 224R-01 và TCVN 9381:2012 ([docs/standards/severity_definition.md](file:///d:/crack_severity_ai/docs/standards/severity_definition.md)).
-* **Lớp A đầy đủ**: Chiều dài, bề rộng trung bình, **bề rộng lớn nhất (`width_max`)** bằng Distance Transform chính xác hiệu chỉnh nửa pixel, diện tích, góc trục chính (moments), phân nhánh (skeleton Zhang-Suen), độ tương phản `contrast_ratio` (proxy cho độ sâu).
-* **Kiểm chứng đo lường** (`scripts/validate_measurements.py`): Sai số `width_max` $\le 1\text{px}$, chiều dài $0\text{px}$, góc $0^\circ$, nhận diện nhánh chính xác $\to$ **ĐẠT NGHIỆM THU**.
-* **Đa yếu tố**: Giải quyết trường hợp vết nứt dài nhưng mảnh hoặc vết nứt đậm sâu (tự động cộng mức, chặn tại L3, vết xuyên cấu kiện ép L3).
-* **Tích hợp trọn vòng đời**: Công cụ đo GSD 2 điểm trực tiếp trên ảnh; API tái phân loại không cần suy luận lại (`POST /api/severity`).
+---
 
-## 3. Đang triển khai (Hiện tại)
-* **Đa bề mặt & Đưa lại nhóm mặt đường**:
-  * Đưa lại các bộ mặt đường (Crack500, 3DCrack, GAPs, CFD, CrackTree, RDD2022) và mở rộng tường sơn, gạch masonry, đá, kính, thép, gỗ để nâng tổng kho dữ liệu lên **60.000+ ảnh**.
-* **Xử lý vết mảnh & Vân đá cho Phase 1 v3**:
-  * Tiled training $640\text{px}$ ở độ phân giải gốc cho Volker / Rissbilder kết hợp SAHI inference + WBF.
-  * Đưa hard-negative vân đá vào tập train để giảm FP xuống $<10\%$.
-  * Huấn luyện v3 fine-tune từ v1 ở độ phân giải $960\text{px}$.
-* **Chuẩn bị bài báo khoa học (CrackSieve)**: Hoàn thiện bảng đối chứng SOTA với framework GT-CrackSeg của Georgia Tech.
+## 2. Đang triển khai (Kế hoạch Đột phá Kỷ lục SOTA >90%)
 
-## 4. Kế hoạch tiếp theo — Khởi động Phase 3: Spalling & Lộ kết cấu (Tái khởi công công trình)
-* **Bối cảnh ứng dụng**: Kiểm định đánh giá an toàn chịu lực cho các **tòa nhà bị đình trệ / đắp chiếu nhiều năm** trước khi tái khởi công xây dựng tiếp (theo Nghị định 06/2021/NĐ-CP, TCVN 9381:2012, ACI 562-19).
-* **Nhiệm vụ trọng tâm**:
-  1. **Dữ liệu**: Tích hợp các bộ `CrSpEE`, `SegCODEBRIM`, `CUHK-USR Defect`, `UAV Façade` $\to$ Gán nhãn 3 lớp: `crack`, `spalling`, `exposed_rebar`.
-  2. **Mô hình**: Huấn luyện YOLOv8-seg đa khuyết tật (Multi-class defect segmentation).
-  3. **Module định lượng & Thang 4 cấp SP0–SP3**:
-     * Đo diện tích bong tróc ($S_{\text{spall}}$), chiều sâu tương đối, tỷ lệ diện tích vỡ trên cấu kiện dầm/cột.
-     * Đo chiều dài và diện tích thanh thép kết cấu bị lộ ($L_{\text{rebar}}$), nhận diện mức độ gỉ sét.
-     * Xếp loại từ `SP0` (an toàn thi công tiếp) đến `SP3` (cấm tái khởi công, nguy cơ mất an toàn chịu lực, bắt buộc chống đỡ tạm và gia cố).
-  4. **Tích hợp Web App**: Bổ sung phân hệ "Kiểm định công trình tái khởi công" và xuất Báo cáo An toàn Kết cấu tổng hợp in PDF.
-  5. Xem tài liệu thiết kế chi tiết tại [docs/standards/SPALLING_PHASE.md](file:///d:/crack_severity_ai/docs/standards/SPALLING_PHASE.md).
+### 🎯 Bước 1: Xây dựng Bộ Dữ Liệu Tinh Khiết & Tiền Xử Lý
+1. **Gói dữ liệu Phase 1.A (Vết nứt bề mặt dễ - Tường, Đường, Bê tông phẳng)**:
+   - Quy mô: **~28,700 ảnh sạch 100%** (25,200 ảnh nứt có mask + 3,500 ảnh âm chống báo giả từ METU Negative & SDNET UD).
+   - Tiền xử lý cao cấp: Bilateral Filtering ($d=5, \sigma=50$) làm mịn bề mặt + Adaptive CLAHE ($clip=2.5, tile=8\times 8$) khuếch đại rãnh nứt.
+   - Script đóng gói: `scripts/data/build_phase1_a_easy_surfaces.py`.
+2. **Gói dữ liệu Phase 2 Mới (Bong tróc & Cốt thép - Độc lập hoàn toàn)**:
+   - Quy mô: **~12,700 ảnh sạch 100%** (Rebar Exposure, RC Structure, HRCDS, spallSubImage + 1,500 ảnh âm).
+   - **Triệt tiêu 100% nhãn `crack`** để tránh xung đột định dạng với Phase 1.
+   - 3 Lớp khuyết tật: `0: spalling`, `1: exposed_rebar`, `2: corrosion`.
+   - Tiền xử lý: Chuyển đổi không gian màu CIE-Lab khuếch đại màu gỉ sắt $Fe_2O_3$ đỏ nâu + Retinex triệt tiêu bóng tối dưới hốc vỡ.
+   - Script đóng gói: `scripts/data/build_phase2_clean_multidefect.py`.
+
+### 🎯 Bước 2: Huấn Luyện Song Song Trên Kaggle (Target Vượt SOTA)
+- **Phase 1.A (Easy Crack)**:
+  - Model: `yolov8m-seg.pt` (25.9M params), `imgsz=1024`, `batch=8`, `epochs=80`.
+  - Augmentation: `copy_paste=0.4` (CrackPaste), `mosaic=1.0`.
+  - **Mục tiêu**: Box mAP50 **≥ 93.5%** (vượt kỷ lục thế giới hiện tại 92.4% của YOLOv8-CA).
+- **Phase 2 (Spalling & Rebar)**:
+  - Model: `yolov8m-seg.pt`, `imgsz=1024`, `batch=8`, `epochs=100`.
+  - **Mục tiêu**: Box mAP50 **≥ 90.5%** (vượt kỷ lục thế giới hiện tại 89.5% của YOLOv8-LSKA).
+
+---
+
+## 3. Kế hoạch tiếp theo — Hoàn thiện Toàn Diện Phase 3 SHM
+
+* **Kiểm định Công trình Phân Tầng & Di Sản Kiến Trúc**:
+  * Hỗ trợ quét toàn bộ một tầng (Tầng 1, Tầng 2...) hoặc công trình di sản (như Tháp Bà Ponagar, Cố đô Huế).
+  * Khử trùng lặp thị giác ORB Homography để tính tỷ lệ diện tích hư hỏng thực tế so với toàn bộ không gian hình học.
+* **AI Bo Khung Cấu Kiện & Ánh Xạ Khuyết Tật (Spatial Containment)**:
+  * AI tự động vẽ Bounding Box bao quanh Cột, Dầm, Sàn, Nút dầm-cột, Móng.
+  * Tự động xác định vết nứt/spalling nằm trên cấu kiện nào để nhân hệ số nguy cơ chịu lực.
+* **Bảng Thống Kê & Lọc Sắp Xếp Đa Tiêu Chí (Sort & Filtering Dashboard)**:
+  * Lọc theo cấu kiện: Chỉ xem Cột, Dầm, Sàn, Tường.
+  * Sắp xếp số vết nứt / mảng spalling giảm dần (ví dụ: *Cột C12 có 7 vết nứt $\to$ Đưa lên đầu danh sách để kỹ sư ưu tiên gia cường*).
+  * Phân cấp mức độ nguy cơ gãy đổ theo thang SCI (0 - 100%) và xuất Báo cáo Thẩm định PE Sign-off in PDF chuẩn quy trình.
