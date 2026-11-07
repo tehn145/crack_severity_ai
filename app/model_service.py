@@ -13,7 +13,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-MODEL_PATH = Path(os.environ.get("MODEL_PATH", "weights/phase1/best.pt"))
+MODEL_PATH = Path(os.environ.get(
+    "MODEL_PATH",
+    r"weights/phase1/results phase 1.2 6nov2026/best.pt"
+))
 MODEL_REPO = os.environ.get("MODEL_REPO", "")  # vd "tehn145/crack-phase1" trên HF
 DEFAULT_CONf = float(os.environ.get("DEFAULT_CONF", "0.25"))
 DEFAULT_IMGSZ = int(os.environ.get("DEFAULT_IMGSZ", "640"))

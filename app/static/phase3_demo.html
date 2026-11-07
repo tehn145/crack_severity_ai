@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 3 — Structural Health Monitoring (SHM) Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --border: #1e293b;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #8b5cf6;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 50px;
+    }
+    header {
+      background: rgba(19, 27, 46, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-phase {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .logo h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .status-pill {
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: #1e293b;
+      border-radius: 99px;
+      color: var(--text-dim);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    
+    .container {
+      max-width: 1400px;
+      margin: 28px auto;
+      padding: 0 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    select, input[type="file"], input[type="text"] {
+      width: 100%;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: var(--primary);
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+      margin-top: 10px;
+    }
+    .btn-submit:hover { opacity: 0.95; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Results layout */
+    .kpi-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .kpi-title { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
+    .kpi-val { font-size: 28px; font-weight: 800; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+    .sci-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .recommendation-box {
+      background: rgba(59, 130, 246, 0.08);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 24px;
+    }
+    .recommendation-box h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .recommendation-box p { font-size: 13.5px; color: #cbd5e1; }
+
+    .images-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .img-card {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .img-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      background: #000;
+      cursor: pointer;
+    }
+    .img-meta {
+      padding: 14px;
+      font-size: 13px;
+    }
+    .img-meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .defect-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .d-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tag-crack { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+    .tag-spall { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .tag-rebar { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .tag-corrosion { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; }
+    .tag-compound { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid #ec4899; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #0b0f19;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-box { width: 14px; height: 14px; border-radius: 3px; }
+
+    #spinner {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    .loader {
+      border: 4px solid #1e293b;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="badge-phase">Phase 3</span>
+    <h1>Structural Health Monitoring (SHM) Engine</h1>
+  </div>
+  <div class="status-pill">
+    <span class="dot" id="sys-dot"></span>
+    <span id="sys-status">Dual Models Online</span>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+    <!-- CỘT BÊN TRÁI: ĐIỀU KHIỂN & TẢI ẢNH -->
+    <div class="card">
+      <div class="card-title">
+        <span>⚙️</span> Cấu Hình Khảo Sát
+      </div>
+
+      <div class="form-group">
+        <label>Chế độ quét:</label>
+        <select id="scan-mode" onchange="toggleMode()">
+          <option value="folder">📁 Quét Tập Ảnh / Cả Tầng (Folder Dedup)</option>
+          <option value="single">📷 Phân Tích 1 Ảnh Đơn Lẻ</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Chọn ảnh kiểm định:</label>
+        <input type="file" id="file-input" multiple accept="image/*">
+        <small style="color:var(--text-dim);font-size:11.5px;display:block;margin-top:4px;">
+          Hỗ trợ chọn nhiều ảnh cùng lúc để quét toàn cảnh tầng.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Cấu kiện khảo sát chính:</label>
+        <select id="comp-type">
+          <option value="beam_column_joint">Nút dầm - cột (3.5x nguy cơ)</option>
+          <option value="column">Cột chịu lực nén (3.0x nguy cơ)</option>
+          <option value="beam">Dầm chính chịu uốn (2.5x nguy cơ)</option>
+          <option value="girder">Dầm phụ / dầm giằng (2.5x nguy cơ)</option>
+          <option value="stair">Bản thang / chiếu nghỉ (2.0x nguy cơ)</option>
+          <option value="slab">Sàn bê tông (1.5x nguy cơ)</option>
+          <option value="wall" selected>Tường xây / vách ngăn (1.0x)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="dedup-box">
+        <label class="checkbox-group">
+          <input type="checkbox" id="dedup-check" checked>
+          <span>Khử trùng lặp thị giác (ORB Homography)</span>
+        </label>
+        <small style="color:var(--text-dim);font-size:11.5px;display:block;margin-top:4px;margin-left:28px;">
+          Tránh tính trùng diện tích khi chụp nhiều góc cùng 1 vết nứt.
+        </small>
+      </div>
+
+      <button class="btn-submit" id="btn-run" onclick="runAnalysis()">
+        <span>🚀</span> Tiến Hành Phân Tích Kết Cấu
+      </button>
+    </div>
+
+    <!-- CỘT BÊN PHẢI: KẾT QUẢ ĐÁNH GIÁ -->
+    <div>
+      <div id="spinner">
+        <div class="loader"></div>
+        <p style="font-size:14px;color:var(--text-dim);">Đang chạy Dual Inference (Phase 1.2 + Phase 2) &amp; Khử Trùng Lặp...</p>
+      </div>
+
+      <div id="results-area" style="display:none;">
+        <!-- KPI Row -->
+        <div class="kpi-banner">
+          <div class="kpi-card">
+            <div class="kpi-title">Chỉ số SCI (Collapse Index)</div>
+            <div class="kpi-val" id="sci-val">--%</div>
+            <div class="sci-badge" id="sci-badge">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Tỷ lệ diện tích khuyết tật</div>
+            <div class="kpi-val" id="defect-ratio-val">--%</div>
+            <small style="color:var(--text-dim);font-size:11.5px;" id="dedup-note">Đã khử lặp thị giác</small>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Tổng số ảnh khảo sát</div>
+            <div class="kpi-val" id="images-count-val">--</div>
+            <small style="color:var(--text-dim);font-size:11.5px;">Quét không gian đa góc</small>
+          </div>
+        </div>
+
+        <!-- Khuyến nghị kỹ thuật -->
+        <div class="recommendation-box" id="rec-box">
+          <h4>Khuyến nghị đánh giá PE &amp; Biện pháp xử lý</h4>
+          <p id="rec-text">--</p>
+        </div>
+
+        <!-- Chú giải màu sắc -->
+        <div class="legend">
+          <div class="legend-item"><div class="legend-box" style="background:#3b82f6;"></div><span>Nứt (Phase 1.2)</span></div>
+          <div class="legend-item"><div class="legend-box" style="background:#f59e0b;"></div><span>Bong tróc bê tông (Phase 2)</span></div>
+          <div class="legend-item"><div class="legend-box" style="background:#ef4444;"></div><span>Lộ cốt thép (Phase 2)</span></div>
+          <div class="legend-item"><div class="legend-box" style="background:#a855f7;"></div><span>Gỉ sét / Ăn mòn (Phase 2)</span></div>
+          <div class="legend-item"><div class="legend-box" style="background:#ec4899;"></div><span>Vùng giao cắt nguy hiểm</span></div>
+        </div>
+
+        <!-- Danh sách ảnh kết quả -->
+        <h3 style="font-size:16px;margin-bottom:14px;font-weight:700;">Chi tiết ảnh chú thích đa tầng</h3>
+        <div class="images-gallery" id="gallery"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleMode() {
+    const mode = document.getElementById('scan-mode').value;
+    document.getElementById('dedup-box').style.display = mode === 'folder' ? 'block' : 'none';
+  }
+
+  async function checkHealth() {
+    try {
+      const res = await fetch('/api/phase3/health');
+      const data = await res.json();
+      if (data.status === 'ok') {
+        document.getElementById('sys-status').innerText = 'Phase 1.2 + Phase 2 Online';
+        document.getElementById('sys-dot').style.background = '#10b981';
+      } else {
+        document.getElementById('sys-status').innerText = 'Kiểm tra đường dẫn model';
+        document.getElementById('sys-dot').style.background = '#f59e0b';
+      }
+    } catch (e) {
+      document.getElementById('sys-status').innerText = 'Không kết nối được server';
+      document.getElementById('sys-dot').style.background = '#ef4444';
+    }
+  }
+  checkHealth();
+
+  async function runAnalysis() {
+    const fileInput = document.getElementById('file-input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert('Vui lòng chọn ít nhất 1 ảnh để khảo sát!');
+      return;
+    }
+
+    const mode = document.getElementById('scan-mode').value;
+    const comp = document.getElementById('comp-type').value;
+    const dedup = document.getElementById('dedup-check').checked;
+
+    document.getElementById('btn-run').disabled = true;
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('results-area').style.display = 'none';
+
+    try {
+      if (mode === 'single' || fileInput.files.length === 1) {
+        // Phân tích đơn
+        const fd = new FormData();
+        fd.append('file', fileInput.files[0]);
+        fd.append('component_type', comp);
+        fd.append('conf1', 0.25);
+        fd.append('conf2', 0.25);
+
+        const res = await fetch('/api/phase3/analyze', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderSingleResult(data);
+      } else {
+        // Phân tích folder
+        const fd = new FormData();
+        for (let f of fileInput.files) {
+          fd.append('files', f);
+        }
+        fd.append('components_json', JSON.stringify(Array(fileInput.files.length).fill(comp)));
+        fd.append('dedup_enabled', dedup);
+        fd.append('conf1', 0.25);
+        fd.append('conf2', 0.25);
+
+        const res = await fetch('/api/phase3/analyze-folder', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderFolderResult(data);
+      }
+    } catch (err) {
+      alert('Lỗi phân tích: ' + err.message);
+    } finally {
+      document.getElementById('btn-run').disabled = false;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('results-area').style.display = 'block';
+    }
+  }
+
+  function renderSingleResult(data) {
+    const sci = data.sci_contribution || 0;
+    document.getElementById('sci-val').innerText = sci.toFixed(1) + '%';
+    const badge = document.getElementById('sci-badge');
+    badge.innerText = getSciLabel(sci);
+    badge.style.background = getSciColor(sci);
+    badge.style.color = '#fff';
+
+    document.getElementById('defect-ratio-val').innerText = ((data.defect_ratio || 0) * 100).toFixed(2) + '%';
+    document.getElementById('images-count-val').innerText = '1';
+    document.getElementById('dedup-note').innerText = 'Ảnh đơn vị trí';
+
+    document.getElementById('rec-text').innerText = getSciRecommendation(sci);
+
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = `
+      <div class="img-card">
+        <img src="data:image/jpeg;base64,${data.annotated_b64}" onclick="openImg(this.src)">
+        <div class="img-meta">
+          <div class="img-meta-row">
+            <span>Cấu kiện: <b>${data.component_type.toUpperCase()}</b></span>
+            <span>Hệ số: <b>${data.risk_multiplier}x</b></span>
+          </div>
+          <div class="img-meta-row">
+            <span>Thời gian suy luận:</span>
+            <span>${data.elapsed_ms} ms</span>
+          </div>
+          <div class="defect-tags">
+            ${(data.detections_p1 || []).length > 0 ? `<span class="d-tag tag-crack">Vết nứt (${data.detections_p1.length})</span>` : ''}
+            ${(data.detections_p2 || []).length > 0 ? `<span class="d-tag tag-spall">Khuyết tật khác (${data.detections_p2.length})</span>` : ''}
+            ${(data.compound_zones || []).length > 0 ? `<span class="d-tag tag-compound">Giao thoa (${data.compound_zones.length})</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFolderResult(data) {
+    const sci = data.sci_score || 0;
+    document.getElementById('sci-val').innerText = sci.toFixed(1) + '%';
+    const badge = document.getElementById('sci-badge');
+    badge.innerText = data.sci_label || getSciLabel(sci);
+    badge.style.background = data.sci_color || getSciColor(sci);
+    badge.style.color = '#fff';
+
+    const defectRatio = data.total_defect_ratio !== undefined ? data.total_defect_ratio : 0;
+    document.getElementById('defect-ratio-val').innerText = (defectRatio * 100).toFixed(2) + '%';
+    document.getElementById('images-count-val').innerText = data.total_images || 0;
+    document.getElementById('dedup-note').innerText = data.overlap_dedup_applied ? 'Đã khử trùng lặp (ORB)' : 'Không khử trùng lặp';
+
+    document.getElementById('rec-text').innerText = data.recommendation || getSciRecommendation(sci);
+
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+    (data.images || []).forEach((img, i) => {
+      gallery.innerHTML += `
+        <div class="img-card">
+          <img src="data:image/jpeg;base64,${img.annotated_b64}" onclick="openImg(this.src)">
+          <div class="img-meta">
+            <div class="img-meta-row">
+              <span>Ảnh #${i + 1} (${img.component_type || 'wall'})</span>
+              <span>Đóng góp SCI: <b>${(img.sci_contribution || 0).toFixed(1)}%</b></span>
+            </div>
+            <div class="img-meta-row">
+              <span style="color:var(--text-dim);font-size:11.5px;">Trọng số diện tích mới:</span>
+              <span style="color:#60a5fa;font-weight:600;">${((img.overlap_weight || 1.0) * 100).toFixed(0)}%</span>
+            </div>
+            <div class="defect-tags">
+              ${(img.detections_p1 || []).length > 0 ? `<span class="d-tag tag-crack">Nứt: ${img.detections_p1.length}</span>` : ''}
+              ${(img.detections_p2 || []).length > 0 ? `<span class="d-tag tag-spall">Khuyết tật P2: ${img.detections_p2.length}</span>` : ''}
+              ${(img.compound_zones || []).length > 0 ? `<span class="d-tag tag-compound">Nguy hiểm: ${img.compound_zones.length}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function getSciLabel(sci) {
+    if (sci < 15) return 'AN TOÀN';
+    if (sci < 35) return 'CẢNH BÁO';
+    if (sci < 60) return 'NGUY HIỂM KẾT CẤU';
+    return 'KHẨN CẤP - SƠ TÁN';
+  }
+
+  function getSciColor(sci) {
+    if (sci < 15) return '#10b981';
+    if (sci < 35) return '#f59e0b';
+    if (sci < 60) return '#f97316';
+    return '#ef4444';
+  }
+
+  function getSciRecommendation(sci) {
+    if (sci < 15) return 'Kết cấu ổn định. Quan trắc định kỳ 6-12 tháng. Không cần can thiệp kết cấu ngay.';
+    if (sci < 35) return 'Khuyết tật mức trung bình. Đề xuất trám trét vết nứt bằng keo Epoxy, dặm vá vữa polymer chống thấm bề mặt.';
+    if (sci < 60) return 'Nguy cơ suy giảm khả năng chịu tải. Yêu cầu khảo sát chuyên sâu PE, gia cường bằng dán tấm sợi carbon (CFRP) hoặc bọc thép hình.';
+    return 'KHẨN CẤP: Chống đỡ tạm thời, sơ tán người và tài sản khỏi khu vực ảnh hưởng. Lập phương án kích cứu hộ hoặc tháo dỡ khẩn cấp.';
+  }
+
+  function openImg(src) {
+    const w = window.open("");
+    w.document.write(`<img src="${src}" style="max-width:100%;height:auto;background:#000;">`);
+  }
+</script>
+
+</body>
+</html>

@@ -24,7 +24,7 @@ const state = {
 function go(route) { location.hash = route; }
 function onRoute() {
   const name = (location.hash || "#/dashboard").replace("#/", "");
-  const views = ["gateway", "dashboard", "inspect", "inspections", "severity", "analytics", "settings"];
+  const views = ["gateway", "dashboard", "inspect", "phase3", "inspections", "severity", "analytics", "settings"];
   const v = views.includes(name) ? name : "gateway";
   views.forEach((x) => ($("view-" + x).hidden = x !== v));
   document.querySelectorAll(".sidebar nav a").forEach((a) =>
@@ -198,6 +198,7 @@ function setFile(f) {
   state.file = f;
   $("preview").src = URL.createObjectURL(f);
   $("preview").hidden = false;
+  autoClassifyComponent(f);
   $("status").textContent = "";
 }
 function setupDropzone() {
@@ -744,3 +745,41 @@ function toast(msg, kind = "") {
 $("role").addEventListener("change", loadInspections);
 
 init();
+
+
+async function autoClassifyComponent(file) {
+  try {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/phase3/classify-component", { method: "POST", body: fd });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.component_name) {
+      const sel = $("component");
+      if (sel) {
+        for (let opt of sel.options) {
+          const t = opt.text.toLowerCase();
+          if (
+            (data.component_type === "column" && t.includes("cột")) ||
+            (data.component_type === "beam" && t.includes("dầm")) ||
+            (data.component_type === "beam_column_joint" && t.includes("dầm")) ||
+            (data.component_type === "wall" && t.includes("tường")) ||
+            (data.component_type === "slab" && t.includes("sàn")) ||
+            (data.component_type === "stair" && t.includes("thang"))
+          ) {
+            sel.value = opt.value;
+            break;
+          }
+        }
+      }
+      const tag = document.getElementById("ai-component-tag");
+      if (tag) {
+        tag.style.display = "block";
+        tag.innerHTML = `🤖 <b>AI Tự động nhận diện cấu kiện:</b> ${data.component_name} (${(data.confidence * 100).toFixed(0)}% tin cậy) · Hệ số rủi ro: <b>${data.risk_multiplier}x</b><br><small style="color:#475569">${data.evidence || ""}</small>`;
+      }
+      toast(`🤖 AI đã nhận diện: ${data.component_name} (${data.risk_multiplier}x)`);
+    }
+  } catch (err) {
+    console.warn("AI classify failed", err);
+  }
+}

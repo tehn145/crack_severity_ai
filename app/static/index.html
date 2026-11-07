@@ -51,6 +51,7 @@
     <nav>
       <a href="#/dashboard" data-view="dashboard">Tổng quan</a>
       <a href="#/inspect" data-view="inspect">Phiếu kiểm tra</a>
+      <a href="#/phase3" data-view="phase3">🤖 Giám định SHM (Phase 3)</a>
       <a href="#/inspections" data-view="inspections">Building Registry <span id="nav-count" class="pill" hidden></span></a>
       <a href="#/severity" data-view="severity">Crack Vectors &amp; Severity</a>
       <a href="#/analytics" data-view="analytics">Inference Engine</a>
@@ -134,7 +135,10 @@
             </div>
             <div class="form-pair">
               <label>Tầng <input id="floor" placeholder="VD: T12"></label>
-              <label>Cấu kiện <select id="component"></select></label>
+              <label>Cấu kiện (AI tự động chọn khi có ảnh) <select id="component"></select></label>
+            </div>
+            <div id="ai-component-tag" style="grid-column:1/-1;font-size:12.5px;color:#1d4ed8;background:#eff6ff;padding:7px 12px;border-radius:6px;border:1px solid #bfdbfe;display:none;"></div>
+            <div>
             </div>
             <div class="form-pair">
               <label>Người kiểm tra <input id="engineer" placeholder="Họ tên kỹ sư"></label>
@@ -297,6 +301,24 @@
           <div class="sota-row"><span><b>2.</b> Mỗi vết có chip mức độ L0–L3; tick <b>Xuyên?</b> nếu vết xuyên cấu kiện</span></div>
           <div class="sota-row"><span><b>3.</b> Sau khi lưu: mở hồ sơ → nhập/đổi GSD → <b>Tính lại từ px đã lưu</b></span></div>
           <div class="sota-row"><span><b>4.</b> Báo cáo PDF in mức độ từng vết + hai ô chữ ký PE sign-off</span></div>
+        </div>
+      </section>
+
+      
+      <!-- PHASE 3 SHM CONSOLE EMBEDDED -->
+      <section id="view-phase3" class="view" hidden>
+        <div class="page-head">
+          <div>
+            <h1>Structural Health Monitoring (SHM) Console — Phase 3</h1>
+            <p>Hệ thống giám định toàn diện: Dual Inference (Phase 1.2 + Phase 2) + Khử trùng lặp ORB + AI Phân loại cấu kiện + Chỉ số sụp đổ SCI</p>
+          </div>
+          <div class="head-actions">
+            <a class="btn ghost" href="/phase3" target="_blank">Mở toàn màn hình ↗</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.05);min-height:800px;">
+          <iframe src="/phase3" style="width:100%;height:850px;border:none;" title="Phase 3 SHM Console"></iframe>
         </div>
       </section>
 

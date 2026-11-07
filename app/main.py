@@ -29,13 +29,15 @@ from fastapi.staticfiles import StaticFiles
 
 from . import db
 from .model_service import DEFAULT_IMGSZ, detect, get_model
+from .phase3_endpoints import router as phase3_router
 from .severity import SCALE_META
 
-APP_VERSION = "3.1.0-phase1+2"
+APP_VERSION = "3.2.0-phase3-shm"
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(title="Crack Severity AI — Phase 1", version=APP_VERSION)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.include_router(phase3_router)
 
 COMPONENTS = ["cột", "tường", "sàn", "dầm", "cầu thang", "ban công", "khác"]
 
@@ -71,6 +73,16 @@ def console() -> Response:
 @app.get("/review", response_class=HTMLResponse)
 def review() -> Response:
     return _infra("structural_evaluation_pe_sign_off_review.html")
+
+
+@app.get("/phase3", response_class=HTMLResponse)
+def phase3_demo_page() -> Response:
+    """Giao diện Demo trực quan Phase 3 Structural Health Monitoring."""
+    html_path = STATIC_DIR / "phase3_demo.html"
+    return HTMLResponse(
+        html_path.read_text(encoding="utf-8"),
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+    )
 
 
 @app.get("/marketplace", response_class=HTMLResponse)
