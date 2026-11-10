@@ -1,0 +1,45 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Traceback (most recent call last):
+  File "C:\Users\ngoki\AppData\Local\Temp\dl_c9k.py", line 4, in <module>
+    p = hf_hub_download(repo_id="rimvydasrub/crackseg9k", filename=f, repo_type="dataset", local_dir="data/raw/public/v4_sources/crackseg9k")
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\utils\_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\utils\_http.py", line 276, in _inner
+    return fn(*args, **kwargs)
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\file_download.py", line 1026, in hf_hub_download
+    return _hf_hub_download_to_local_dir(
+        # Destination
+    ...<16 lines>...
+        dry_run=dry_run,
+    )
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\file_download.py", line 1505, in _hf_hub_download_to_local_dir
+    _download_to_tmp_and_move(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        incomplete_path=paths.incomplete_path(etag),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\file_download.py", line 2017, in _download_to_tmp_and_move
+    xet_get(
+    ~~~~~~~^
+        incomplete_path=tmp_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        tqdm_class=tqdm_class,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ngoki\AppData\Local\Programs\Python\Python313\Lib\site-packages\huggingface_hub\file_download.py", line 589, in xet_get
+    with session.new_file_download_group(
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        endpoint=connection_info.endpoint,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        progress_callback=progress.update_progress,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as group:
+    ^
+RuntimeError: Task error: File reconstruction error: CAS Client Error: Format error: I/O error: error decoding response body

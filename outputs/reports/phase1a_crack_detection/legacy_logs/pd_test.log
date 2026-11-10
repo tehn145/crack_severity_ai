@@ -1,0 +1,14 @@
+  part0: xong
+  part1: xong
+  part2: xong
+  part3: xong
+  part4: xong
+  part5: xong
+Traceback (most recent call last):
+  File "D:\crack_severity_ai\scripts\parallel_download.py", line 52, in <module>
+    parallel(url, out, size, n)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\crack_severity_ai\scripts\parallel_download.py", line 37, in parallel
+    with open(part, "rb") as pf:
+         ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'data/raw/public/v4_sources/crackseg9k/data/test.parquet.part0'

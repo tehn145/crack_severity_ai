@@ -1,5 +1,5 @@
 data/
-outputs/
+outputs/kaggle
 weights/
 *.pt
 *.pth
