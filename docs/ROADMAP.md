@@ -16,26 +16,33 @@
 
 ## 2. Đang triển khai (Kế hoạch Đột phá Kỷ lục SOTA >90%)
 
-### 🎯 Bước 1: Xây dựng Bộ Dữ Liệu Tinh Khiết & Tiền Xử Lý
-1. **Gói dữ liệu Phase 1.A (Vết nứt bề mặt dễ - Tường, Đường, Bê tông phẳng)**:
-   - Quy mô: **~28,700 ảnh sạch 100%** (25,200 ảnh nứt có mask + 3,500 ảnh âm chống báo giả từ METU Negative & SDNET UD).
-   - Tiền xử lý cao cấp: Bilateral Filtering ($d=5, \sigma=50$) làm mịn bề mặt + Adaptive CLAHE ($clip=2.5, tile=8\times 8$) khuếch đại rãnh nứt.
-   - Script đóng gói: `scripts/data/build_phase1_a_easy_surfaces.py`.
+### 🎯 Bước 1: Xây dựng Bộ Dữ Liệu Tinh Khiết & Tiền Xử Lý Quang Học (ĐÃ HOÀN TẤT 100%)
+1. **Gói dữ liệu Phase 1.A (Vết nứt bề mặt dễ — Chuẩn Tinh Khiết 100%)**:
+   - Quy mô thực tế: **19,133 ảnh sạch 100% có ground-truth mask/polygon** (Train: 15,390 | Val: 1,879 | Test: 1,864).
+   - Nguồn dữ liệu thuần bê tông & mặt đường phẳng: `crack_segmentation_dataset` (9,633 ảnh), `Ultralytics_CrackSeg` (4,028 ảnh), `Roads_and_Bridges` (2,741 ảnh), `3DCrack_v1` (1,240 ảnh), `DamSegment Easy/Medium` (997 ảnh).
+   - **Loại bỏ 100% rác**: Không có ảnh từ `BFDD` (loại bỏ vì lẫn bong tróc vôi vữa/sơn bề mặt tòa nhà), không có `detr` (loại bỏ hoàn toàn tường gạch, rêu mốc, clipart).
+   - Khống chế đúng **500 ảnh âm sạch (tỷ lệ chuẩn 2.61%)** từ METU Negative để chống báo động giả.
+   - **Tiền xử lý quang học 4 bước**: Bilateral Filter ($d=5, \sigma=50$) làm mịn cát bụi + Chuyển CIE-LAB + Adaptive CLAHE ($clip=2.5, tile=8\times 8$) trên kênh L khuếch đại rãnh nứt vi mô chìm.
+   - **Chuẩn xuất kép (Dual-Export Format — 57,401 files)**:
+     - Chuẩn 1: YOLO Polygon `.txt` (`labels/`) $\to$ Huấn luyện **YOLOv8-seg, YOLOv11-seg**.
+     - Chuẩn 2: Binary Mask `.png` (`masks/`) $\to$ Huấn luyện **SegFormer, Mask2Former (Hugging Face)**.
+   - Đóng gói hoàn tất: `outputs/kaggle/phase1_a_easy_surfaces.zip` (**1,632.94 MB**).
+   - Script Notebook Kaggle YOLOv11: `scripts/training/kaggle_phase1_a_yolo11_notebook.py`.
+   - Script Notebook Kaggle SegFormer: `scripts/training/kaggle_phase1_a_segformer_notebook.py`.
 2. **Gói dữ liệu Phase 2 Mới (Bong tróc & Cốt thép - Độc lập hoàn toàn)**:
-   - Quy mô: **~12,700 ảnh sạch 100%** (Rebar Exposure, RC Structure, HRCDS, spallSubImage + 1,500 ảnh âm).
-   - **Triệt tiêu 100% nhãn `crack`** để tránh xung đột định dạng với Phase 1.
-   - 3 Lớp khuyết tật: `0: spalling`, `1: exposed_rebar`, `2: corrosion`.
-   - Tiền xử lý: Chuyển đổi không gian màu CIE-Lab khuếch đại màu gỉ sắt $Fe_2O_3$ đỏ nâu + Retinex triệt tiêu bóng tối dưới hốc vỡ.
-   - Script đóng gói: `scripts/data/build_phase2_clean_multidefect.py`.
+   - Quy mô thực tế: **4,457 ảnh sạch 100% polygon segmentation** (Train: 3,566 | Val: 435 | Test: 456).
+   - **Triệt tiêu 100% nhãn `crack`** để tránh xung đột với Phase 1.
+   - 3 Lớp khuyết tật: `0: spalling` (2,214 instances), `1: exposed_rebar` (4,097 instances), `2: corrosion` (1,382 instances).
+   - Tích hợp **700 ảnh âm nền bê tông sạch (15.7%)** với nhãn rỗng.
+   - Tiền xử lý quang học: Mild Bilateral ($d=3, \sigma=20$) giữ nguyên góc cạnh bong tróc + CLAHE + HSV Saturation boost x1.15 làm nổi bật gỉ sét.
+   - Đóng gói hoàn tất: `outputs/kaggle/phase2_clean_multidefect.zip` (**517.09 MB**).
 
-### 🎯 Bước 2: Huấn Luyện Song Song Trên Kaggle (Target Vượt SOTA)
-- **Phase 1.A (Easy Crack)**:
-  - Model: `yolov8m-seg.pt` (25.9M params), `imgsz=1024`, `batch=8`, `epochs=80`.
-  - Augmentation: `copy_paste=0.4` (CrackPaste), `mosaic=1.0`.
-  - **Mục tiêu**: Box mAP50 **≥ 93.5%** (vượt kỷ lục thế giới hiện tại 92.4% của YOLOv8-CA).
-- **Phase 2 (Spalling & Rebar)**:
-  - Model: `yolov8m-seg.pt`, `imgsz=1024`, `batch=8`, `epochs=100`.
-  - **Mục tiêu**: Box mAP50 **≥ 90.5%** (vượt kỷ lục thế giới hiện tại 89.5% của YOLOv8-LSKA).
+### 🎯 Bước 2: Giải Đấu Huấn Luyện Đa Mô Hình (Multi-Model Tournament SOTA)
+- **Đấu thủ 1 — YOLOv8m-seg (CNN Baseline)**: `imgsz=1024`, 80 epochs $\to$ Target Box mAP50 $\ge$ 93.5%.
+- **Đấu thủ 2 — YOLOv11m-seg (SOTA CNN 2024)**: Kiến trúc C3k2 + SPPF attention $\to$ Target Box mAP50 $\ge$ 94.0%.
+- **Đấu thủ 3 — NVIDIA SegFormer-B3/B4 (Hugging Face Transformer)**: Hierarchical Multi-scale Self-Attention $\to$ Target mIoU $\ge$ 85%, F1 $\ge$ 94%.
+- **Đấu thủ 4 — Meta Mask2Former (Hugging Face Universal Segmentor)**: Swin Transformer + Masked Attention Query.
+- **Hợp thể Ensemble (WBF + Soft-Voting)**: Kết hợp thế mạnh của YOLOv11 và SegFormer để xác lập kỷ lục tuyệt đối mAP50 > 95%.
 
 ---
 

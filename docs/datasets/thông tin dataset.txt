@@ -1,0 +1,48 @@
+THÔNG TIN DATASET
+
+PHASE 1A: Toàn bộ là tường, bê tông, mặt đường nứt dễ nhận diện
+PHASE 1B: Gồm gạch men, tường gạch cổ, ngói, đa bề mặt
+
++) Bộ 3DCrack_v1: là bộ tường nứt nên sẽ dùng cho phase 1A
+	Bộ này có cả mask và label nhưng label dạng khác
++) Bộ BanglaCrack-10_YOLOv8_640x640: đây là bộ nứt đa dạng, nứt tường có sơn, có chữ hoa văn, có cửa sổ vật thể... dùng cho phase 1B
+	Bộ này có img và label nên dùng được
++) Bộ: BD3_original_dataset:  D:\crack_severity_ai\data\raw\public\phase 1 cracking\BD3_original_dataset\train\minor_crack chỉ lấy ở thư mục này thôi vì bộ này phù hợp, và dùng được cho phase 1A; D:\crack_severity_ai\data\raw\public\phase 1 cracking\BD3_original_dataset\train\major_crack này nứt nhiều thể loại dùng được cho phase 1B.
+	Bộ này chỉ có ảnh không có mask cũng không có label
++) Bộ BFDD Dataset_1x_20260408: Bộ này là ảnh mặt ngoài của một tòa nhà là bê tông dùng được cho phase 1A
+	Bộ này có RGB là thư mục ảnh gốc; thư mục IR là ảnh nhiệt; Label toàn là màu; Label color thì chỗ nứt là màu xanh dương; Label_backup_7classes_20260125 cũng là label nhưng là ảnh đen; bạn kiểm tra thử cái này là như thế nào để giải quyết riêng nhé
++) Bộ ceramics-defects-detection: đây là thư mục ngói thích hợp dùng cho phase 1B
+	Bộ này có ảnh và mask tuy nhiên bạn cũng cho tôi hướng xử lí với cái này
++) Bộ Concrete_and_Pavement: Bộ này là tường và nứt rất rõ ràng thích hợp dùng cho phase 1A
+	Bộ này chỉ có ảnh âm tính và dương tính không có mask, không có label
++) Bộ ConViD — Concrete Visual Defect Dataset: Bộ này nứt tường và nứt tường có hoa văn cũng thích hợp cho phase 1A
+	Bộ này chỉ có ảnh nứt không có mask, không có label
++) Bộ Crack Data-Darbhanga Fort: Bộ này nứt tường gạch thích hợp cho phase 1B
+	Bộ này có ảnh và label
++) Bộ crack_segmentation_dataset: Bộ này gồm nhiều bộ con; Tất cả bộ con là bộ mặt đường thích hợp cho phase 1A
+	Bộ này có cả hình và label; tuy nhiên có các thư mục chồng nhau xem có bị trùng không
++) Bộ crackSubImageForTraining: Bộ này là mặt tường rất thích hợp cho phase 1A vì ảnh rất sạch
+	Bộ này chỉ có ảnh âm tính và dương tính
++) Bộ DamSegment: sử dụng thư mục này D:\crack_severity_ai\data\raw\public\phase 1 cracking\DamSegment, ảnh tường thích hợp sử dụng cho phase 1A
+	Bộ này có ảnh và label
++) Bộ detr_crack_dataset.v1i.yolov8: Bộ này nứt tường khác nhiều và có thể sử dụng cho phase 1A
+	Bộ này có ảnh và label tuy nhiên bị lẫn nhiều loại hư hỏng và một số bề mặt khó, chúng ta sẽ xử lí riêng
++) Bộ Final-Dataset-Vol2: Bộ này nứt gạch và nứt gạch men thích hợp cho phase 1B
+	Bộ này chỉ có ảnh và mask
++) Bộ Historical Building Cracks: bộ này nứt di sản cũng là tường khá nhận diện có thể dùng cho phase 1B
+	Bộ này chỉ có ảnh âm tính và dương tính
++) Bộ masonry-images-sensors-2021: Bộ này là nứt tường gạch nhưng là pixel, thích hợp cho phase 1B
+	Bộ này chỉ có ảnh âm tính và dương tính
++) Bộ METU: Bộ này nứt bê tông và nứt khá rõ ràng thích hợp cho phase 1A
+	Bộ này chỉ có ảnh âm tính và dương tính
++) Bộ Roads_and_Bridges: Bộ này nứt tường và nứt rõ ràng thích hợp cho phase 1A
+	Bộ này có ảnh và label
++) Bộ SDNET2018: Bộ này nứt pixel về tường thích hợp cho phase 1A
+	Bộ này chỉ có ảnh âm tính và dương tính
++) Bộ Ultralytics_CrackSeg: Bộ này nứt bê tông thích hợp cho phase 1A; tuy nhiên ảnh bị xoay
+	Bộ này có ảnh và label
++) Bộ Wall Crack Image Dataset for Earthquake and Struct: Bộ này nứt đa bề mặt phù hợp cho phase 1B
+	Bộ này chỉ có ảnh nứt	
++) Bộ omnicrack30k có hơn 30k ảnh: Bộ này nứt tường phù hợp cho 1A
+	Bộ này có ảnh, anno và cen
+	Cách xử lí bộ gốc: Bộ này sẽ thành bộ gốc vì hiện tại sạch nhất với các bộ con: BCL, Ceramic, CFD, Crack500, CrackTree, CrrSpEE, CSSC, DeepCrack, DIC_SVS, GAPS384, Khanh11_Eugen_MUller (ở đây tính là bộ con Eugen_Muller nhưng lấy từ nguồn Khanh11k), Khanh11k_Rissbilder_for_Florian, Khanh11k_Volker, LCW_365 (bộ mố cầu dầm, trụ, metro), Masonry, S2DS, TopoDS, UAV75. Chúng ta sẽ đối chiếu trên các tập con có tồn tại ở những bộ chồng lấn, sau đó cái nào nhiều data hơn thì lấy nhưng ưu tiên giữ lại toàn bộ tập này vì tập này đang rất sạch, sau đó bổ sung thêm các nguồn ảnh mới từ các data mà bộ này chưa có ở phase 1A.
